@@ -25,3 +25,6 @@ dist-ssr
 
 dist*
 .cspellcache
+
+# Artefactos de empaquetado de la extensión
+*.zip

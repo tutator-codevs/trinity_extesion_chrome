@@ -4,6 +4,7 @@
   "description": "Registra tus horas de trabajo en Trinity de forma rápida: plantillas reutilizables, cronómetro de actividad y cierre de día en un clic.",
   "private": true,
   "version": "0.1.0",
+  "author": "Guillermo Paredes (codevs) <gdavid.ptorrez@gmail.com>",
   "type": "module",
   "scripts": {
     "dev": "vite --mode chrome",
