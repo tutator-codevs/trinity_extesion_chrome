@@ -26,14 +26,32 @@ type NotifOptions = Notifications.CreateNotificationOptions & {
   requireInteraction?: boolean;
 };
 
-function notify(id: string, options: NotifOptions): Promise<string> {
-  return browser.notifications
-    .create(id, options as Notifications.CreateNotificationOptions)
-    .catch((err) => {
+async function notify(id: string, options: NotifOptions): Promise<string> {
+  try {
+    return await browser.notifications.create(
+      id,
+      options as Notifications.CreateNotificationOptions
+    );
+  } catch (err) {
+    // Causas típicas: iconUrl que no se puede descargar ("Unable to download all
+    // specified images") o `buttons`/`requireInteraction` no soportados. Reintentamos
+    // con una notificación mínima para que el aviso salga igualmente.
+    // eslint-disable-next-line no-console
+    console.warn('[Trinity] notificación completa falló, reintento básico:', err);
+    try {
+      const { title, message } = options;
+      return await browser.notifications.create(id, {
+        type: 'basic',
+        iconUrl: icon(),
+        title: title ?? 'Trinity',
+        message: message ?? '',
+      } as Notifications.CreateNotificationOptions);
+    } catch (err2) {
       // eslint-disable-next-line no-console
-      console.error('[Trinity] no se pudo crear la notificación:', err);
+      console.error('[Trinity] no se pudo crear la notificación:', err2);
       return '';
-    });
+    }
+  }
 }
 
 function openPopup(): void {

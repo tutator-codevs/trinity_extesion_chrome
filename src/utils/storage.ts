@@ -27,6 +27,8 @@ export const DEFAULT_SETTINGS: Settings = {
   endOfDayEnabled: true,
   endOfDayTime: '18:00',
   targetHours: 8,
+  aiProvider: 'none',
+  aiApiKey: '',
 };
 
 export const storage = {

@@ -30,8 +30,13 @@ export default defineManifest({
   // en reunión?"). 'storage' guarda token, usuario y plantillas.
   permissions: ['storage', 'alarms', 'notifications'],
   // Trinity es una app autocontenida: solo habla con su backend por API, no inyecta
-  // scripts en la web de Tutator.
-  host_permissions: ['https://*.tutator.net/*'],
+  // scripts en la web de Tutator. Las URLs de IA son opcionales: solo se usan si el
+  // usuario configura su propia API key para el llenado por voz (Camino B).
+  host_permissions: [
+    'https://*.tutator.net/*',
+    'https://api.anthropic.com/*',
+    'https://generativelanguage.googleapis.com/*',
+  ],
   commands: {
     _execute_action: {
       suggested_key: {

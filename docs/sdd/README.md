@@ -19,6 +19,7 @@ estado y pendientes de un módulo.
 | 5 | Cierre de día | ✅ Aviso (lote pend.) | [05-cierre-dia.md](05-cierre-dia.md) |
 | 6 | Cronómetro de actividad | ✅ Hecho | [06-cronometro.md](06-cronometro.md) |
 | 7 | Atajo de teclado | ✅ Base | [07-atajo-teclado.md](07-atajo-teclado.md) |
+| 8 | Llenado por voz | ✅ Local + IA opcional | [08-voz.md](08-voz.md) |
 
 Leyenda: ✅ Hecho · 🚧 En curso · ⏳ Plan
 

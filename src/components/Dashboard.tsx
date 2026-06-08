@@ -16,6 +16,7 @@ import {
   ArrowLeft,
   Save,
   Bell,
+  Mic,
 } from 'lucide-react';
 
 import { AuthError } from '../utils/api';
@@ -25,6 +26,7 @@ import { storage, STORAGE_KEY } from '../utils/storage';
 import { elapsedMinutes, startActivity, stopActivity } from '../utils/timer';
 import type {
   ActiveTimer,
+  AiProvider,
   RegisterInitial,
   Settings as AppSettings,
   Summary,
@@ -254,6 +256,52 @@ function SettingsPanel({ onBack }: { onBack: () => void }): JSX.Element {
       <p className="px-1 text-[11px] text-slate-400">
         Te avisaremos a esa hora para cerrar el día e indicar si te faltan horas.
       </p>
+
+      <div className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-3.5 shadow-sm">
+        <div className="flex items-center gap-1.5">
+          <Mic size={14} className="text-indigo-600" />
+          <span className="text-sm font-bold text-slate-700">Llenado por voz (IA opcional)</span>
+        </div>
+
+        <div className="flex items-center justify-between">
+          <label htmlFor="set-ai" className="text-sm font-semibold text-slate-700">
+            Proveedor de IA
+          </label>
+          <select
+            id="set-ai"
+            value={settings.aiProvider}
+            onChange={(e) => update({ aiProvider: e.target.value as AiProvider })}
+            className="rounded-lg border border-slate-200 px-2.5 py-1.5 text-sm text-slate-800 outline-none focus:border-indigo-400"
+          >
+            <option value="none">Ninguno (solo local)</option>
+            <option value="anthropic">Claude (Anthropic)</option>
+            <option value="gemini">Gemini (Google)</option>
+          </select>
+        </div>
+
+        {settings.aiProvider !== 'none' ? (
+          <div className="flex flex-col gap-1">
+            <label
+              htmlFor="set-ai-key"
+              className="text-[11px] font-bold uppercase tracking-wide text-slate-400"
+            >
+              API key
+            </label>
+            <input
+              id="set-ai-key"
+              type="password"
+              value={settings.aiApiKey}
+              onChange={(e) => update({ aiApiKey: e.target.value })}
+              placeholder={settings.aiProvider === 'anthropic' ? 'sk-ant-…' : 'AIza…'}
+              className="rounded-lg border border-slate-200 px-2.5 py-1.5 text-sm text-slate-800 outline-none focus:border-indigo-400"
+            />
+            <p className="text-[10px] text-slate-400">
+              Tu key se guarda solo en este equipo. Se usa como respaldo cuando el dictado
+              local no basta; en ese caso la transcripción se envía a tu proveedor.
+            </p>
+          </div>
+        ) : null}
+      </div>
 
       <button
         type="button"

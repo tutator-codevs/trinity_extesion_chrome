@@ -90,6 +90,9 @@ export interface RegisterInitial {
   endTime?: string;
 }
 
+/** Proveedor de IA para el respaldo del llenado por voz. 'none' = solo parser local. */
+export type AiProvider = 'none' | 'anthropic' | 'gemini';
+
 /** Ajustes del usuario (persistidos en storage.local). */
 export interface Settings {
   /** Aviso de cierre de día activado. */
@@ -98,6 +101,10 @@ export interface Settings {
   endOfDayTime: string;
   /** Horas objetivo del día (para avisar si faltan). */
   targetHours: number;
+  /** Proveedor de IA opcional para el llenado por voz (respaldo del parser local). */
+  aiProvider: AiProvider;
+  /** API key del proveedor. Se guarda solo en este equipo; nunca viaja en el bundle. */
+  aiApiKey: string;
 }
 
 /** Cronómetro de actividad en curso. */

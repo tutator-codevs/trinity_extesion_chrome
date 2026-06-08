@@ -18,6 +18,7 @@ import {
   CalendarDays,
   ChevronLeft,
   ChevronRight,
+  Mic,
 } from 'lucide-react';
 
 import { AuthError } from '../utils/api';
@@ -28,6 +29,9 @@ import {
   insertTimecard,
 } from '../utils/trinity';
 import { storage } from '../utils/storage';
+import { parseLocal, resolveFields, type VoiceContext } from '../utils/voiceParse';
+import { parseWithAI } from '../utils/voiceAi';
+import VoicePanel, { type VoiceLang } from './VoicePanel';
 import {
   addDaysToLocalDate,
   addMinutes,
@@ -39,6 +43,7 @@ import {
   todayLocalDate,
 } from '../utils/time';
 import type {
+  AiProvider,
   CatalogItem,
   Project,
   RegisterInitial,
@@ -46,6 +51,14 @@ import type {
   WorkTemplate,
 } from '../utils/types';
 import { BRAND_GRADIENT } from '../lib/brand';
+
+/** Umbral de confianza del parser local por debajo del cual se intenta la IA. */
+const VOICE_AI_THRESHOLD = 0.6;
+
+function defaultVoiceLang(): VoiceLang {
+  const nav = typeof navigator !== 'undefined' ? navigator.language : '';
+  return nav.toLowerCase().startsWith('en') ? 'en' : 'es';
+}
 
 interface RegisterFormProps {
   user: User;
@@ -222,6 +235,13 @@ export default function RegisterForm({
   const [showSaveTpl, setShowSaveTpl] = useState(false);
   const [tplName, setTplName] = useState('');
 
+  // Llenado por voz
+  const [showVoice, setShowVoice] = useState(false);
+  const [voiceLang, setVoiceLang] = useState<VoiceLang>(defaultVoiceLang);
+  const [voiceBusy, setVoiceBusy] = useState(false);
+  const [aiProvider, setAiProvider] = useState<AiProvider>('none');
+  const [aiApiKey, setAiApiKey] = useState('');
+
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -237,7 +257,7 @@ export default function RegisterForm({
       setLoadingMeta(true);
       setMetaError(null);
       try {
-        const [cats, projs, tpls] = await Promise.all([
+        const [cats, projs, tpls, settings] = await Promise.all([
           getCatalogs([
             CATALOG_CODES.WORK_TYPE,
             CATALOG_CODES.TASK_TYPE,
@@ -245,6 +265,7 @@ export default function RegisterForm({
           ]),
           findProjects(),
           storage.getTemplates(),
+          storage.getSettings(),
         ]);
         if (!active) return;
 
@@ -256,6 +277,8 @@ export default function RegisterForm({
         setTaskAdmin(ta);
         setProjects(projs);
         setTemplates(tpls);
+        setAiProvider(settings.aiProvider);
+        setAiApiKey(settings.aiApiKey);
 
         // Prefill (plantilla / reutilizar) o valores por defecto.
         const init = initialRef.current;
@@ -296,6 +319,37 @@ export default function RegisterForm({
     const wt = workTypes.find((w) => w.code === code);
     const nextTasks = wt && isAdministrative(wt.label) ? taskAdmin : taskProject;
     setTaskCode(nextTasks[0]?.code ?? '');
+  };
+
+  /** Precarga el formulario con los campos resueltos (voz, plantilla, etc.). */
+  const applyInitial = (init: RegisterInitial) => {
+    if (init.workTypeCt) setWorkTypeCode(init.workTypeCt);
+    if (init.typeTaskCt) setTaskCode(init.typeTaskCt);
+    if (init.projectId) setProjectId(init.projectId);
+    if (init.description) setDescription(init.description);
+    if (init.date) setDate(init.date);
+    if (init.startTime) setStartTime(init.startTime);
+    if (init.endTime) setEndTime(init.endTime);
+    setError(null);
+  };
+
+  /** Interpreta lo dictado: parser local primero, IA como respaldo si está configurada. */
+  const handleVoiceSubmit = async (transcript: string) => {
+    setVoiceBusy(true);
+    try {
+      const ctx: VoiceContext = { workTypes, taskProject, taskAdmin, projects };
+      const local = parseLocal(transcript, ctx);
+      let { fields } = local;
+      if (local.confidence < VOICE_AI_THRESHOLD && aiProvider !== 'none' && aiApiKey) {
+        const ai = await parseWithAI(transcript, ctx, { provider: aiProvider, apiKey: aiApiKey });
+        if (ai) fields = ai;
+      }
+      if (!fields.description) fields = { ...fields, description: transcript.trim() };
+      applyInitial(resolveFields(fields, ctx));
+      setShowVoice(false);
+    } finally {
+      setVoiceBusy(false);
+    }
   };
 
   const applyTemplate = (t: WorkTemplate) => {
@@ -414,7 +468,18 @@ export default function RegisterForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+    <form onSubmit={handleSubmit} className="relative flex flex-col gap-3">
+      {showVoice ? (
+        <VoicePanel
+          lang={voiceLang}
+          onLangChange={setVoiceLang}
+          aiEnabled={aiProvider !== 'none' && Boolean(aiApiKey)}
+          busy={voiceBusy}
+          onSubmit={handleVoiceSubmit}
+          onClose={() => setShowVoice(false)}
+        />
+      ) : null}
+
       <div className="flex items-center gap-2">
         <button
           type="button"
@@ -426,6 +491,15 @@ export default function RegisterForm({
           <ArrowLeft size={16} />
         </button>
         <h2 className="text-sm font-extrabold text-slate-800">Registrar horas</h2>
+        <button
+          type="button"
+          onClick={() => setShowVoice(true)}
+          className="ml-auto flex items-center gap-1.5 rounded-lg border border-indigo-200 bg-white px-2.5 py-1.5 text-xs font-bold text-indigo-600 shadow-sm transition-colors hover:bg-indigo-50"
+          title="Llenar el formulario dictando por voz"
+        >
+          <Mic size={14} />
+          Por voz
+        </button>
       </div>
 
       {/* Plantillas */}
