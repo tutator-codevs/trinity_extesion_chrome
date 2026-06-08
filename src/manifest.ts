@@ -26,21 +26,29 @@ export default defineManifest({
     48: 'icon48.png',
     128: 'icon128.png',
   },
-  permissions: ['activeTab', 'storage', 'notifications'],
-  host_permissions: [
-    'https://*.tutator.net/*',
-  ],
-  content_scripts: [
-    {
-      js: [isDev ? 'src/content/index.dev.tsx' : 'src/content/index.prod.tsx'],
-      matches: ['https://*.tutator.net/*'],
-      run_at: 'document_end',
+  // 'alarms' + 'notifications' alimentan el cronómetro de actividad (aviso "¿sigues
+  // en reunión?"). 'storage' guarda token, usuario y plantillas.
+  permissions: ['storage', 'alarms', 'notifications'],
+  // Trinity es una app autocontenida: solo habla con su backend por API, no inyecta
+  // scripts en la web de Tutator.
+  host_permissions: ['https://*.tutator.net/*'],
+  commands: {
+    _execute_action: {
+      suggested_key: {
+        default: 'Ctrl+Shift+Y',
+        mac: 'Command+Shift+Y',
+      },
+      description: 'Abrir Trinity',
     },
-  ],
-  web_accessible_resources: [
-    {
-      resources: ['*.js', '*.css', 'public/*'],
-      matches: ['<all_urls>'],
+    'toggle-timer': {
+      suggested_key: {
+        default: 'Ctrl+Shift+U',
+        mac: 'Command+Shift+U',
+      },
+      description: 'Iniciar / terminar cronómetro de actividad',
+      // Funciona aunque el navegador no tenga el foco (Chrome/Edge/Brave en
+      // Windows y macOS; no soportado en Linux ni Firefox).
+      global: true,
     },
-  ],
+  },
 });

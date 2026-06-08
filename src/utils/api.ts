@@ -2,6 +2,15 @@ import { storage } from './storage';
 
 const BASE_URL = 'https://trinity-backend.tutator.net';
 
+/** Se lanza cuando el backend responde 401 (token caducado/ inválido). La UI debe
+ *  capturarla, limpiar la sesión y mostrar el login de nuevo. */
+export class AuthError extends Error {
+  constructor(message = 'Tu sesión expiró. Inicia sesión de nuevo.') {
+    super(message);
+    this.name = 'AuthError';
+  }
+}
+
 interface RequestOptions extends RequestInit {
   useAuth?: boolean;
 }
@@ -19,22 +28,21 @@ export const api = {
       }
     }
 
-    if (
-      !(fetchOptions.body instanceof FormData) &&
-      !headers.has('Content-Type')
-    ) {
+    if (!(fetchOptions.body instanceof FormData) && !headers.has('Content-Type')) {
       headers.set('Content-Type', 'application/json');
     }
-    console.log('entro aca', url);
-    const response = await fetch(url, {
-      ...fetchOptions,
-      headers,
-    });
+
+    const response = await fetch(url, { ...fetchOptions, headers });
+
+    if (response.status === 401) {
+      await storage.clearAuth();
+      throw new AuthError();
+    }
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       throw new Error(
-        errorData.message || `Request failed with status ${response.status}`
+        errorData.message || `La petición falló con código ${response.status}`
       );
     }
 
