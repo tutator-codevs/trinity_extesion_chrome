@@ -2,8 +2,12 @@
 
 Guía para trabajar en este repositorio. Léela antes de tocar código.
 
-> Idioma del producto: **español**. Toda la UI visible al usuario va en español
-> (textos, labels, mensajes de error). Los identificadores en código, en inglés.
+> Idioma de la UI: **sigue el idioma del navegador** (`navigator.language`).
+> Traducidos: **es / en / fr**; respaldo **español** para cualquier otro idioma.
+> Todo texto visible al usuario pasa por `t()` (ver `src/i18n/locale.ts`): cada
+> componente define su diccionario inline `{ es, en, fr }` y crea su `t` con `makeT`.
+> NO hardcodees textos visibles. Los identificadores y comentarios de código, en inglés/español
+> respectivamente (los comentarios existentes están en español).
 
 ## Qué es esto
 

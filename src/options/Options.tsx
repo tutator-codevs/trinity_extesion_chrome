@@ -2,6 +2,52 @@ import { useState, type JSX } from 'react';
 import { Mic, CheckCircle2, AlertTriangle, Loader2 } from 'lucide-react';
 
 import { BRAND_GRADIENT } from '../lib/brand';
+import { makeT, type Dict } from '../i18n/locale';
+
+const dict: Dict = {
+  es: {
+    micPermissionTitle: 'Permiso de micrófono',
+    micPermissionDescription:
+      'Para llenar el formulario dictando por voz, Trinity necesita permiso de micrófono. Concédelo aquí una sola vez; después funcionará desde el popup.',
+    micGranted: '¡Listo! Ya puedes cerrar esta pestaña y dictar desde el popup.',
+    requesting: 'Solicitando…',
+    allowMic: 'Permitir micrófono',
+    audioNote:
+      'El audio lo procesa el navegador para transcribirlo. Solo se usa una IA externa si configuras tu propia API key en Ajustes.',
+    errorBlocked:
+      'Bloqueaste el micrófono. Permítelo desde el icono de la barra de direcciones y reintenta.',
+    errorGeneric: 'No se pudo acceder al micrófono. Revisa que haya uno conectado.',
+  },
+  en: {
+    micPermissionTitle: 'Microphone permission',
+    micPermissionDescription:
+      'To fill out the form by dictating with your voice, Trinity needs microphone permission. Grant it here just once; after that it will work from the popup.',
+    micGranted: 'Done! You can now close this tab and dictate from the popup.',
+    requesting: 'Requesting…',
+    allowMic: 'Allow microphone',
+    audioNote:
+      'The audio is processed by the browser to transcribe it. An external AI is only used if you configure your own API key in Settings.',
+    errorBlocked:
+      'You blocked the microphone. Allow it from the icon in the address bar and try again.',
+    errorGeneric: 'Could not access the microphone. Check that one is connected.',
+  },
+  fr: {
+    micPermissionTitle: 'Autorisation du microphone',
+    micPermissionDescription:
+      'Pour remplir le formulaire en dictant à la voix, Trinity a besoin de l’autorisation du microphone. Accordez-la ici une seule fois ; ensuite elle fonctionnera depuis le popup.',
+    micGranted: 'C’est fait ! Vous pouvez fermer cet onglet et dicter depuis le popup.',
+    requesting: 'Demande en cours…',
+    allowMic: 'Autoriser le microphone',
+    audioNote:
+      'L’audio est traité par le navigateur pour le transcrire. Une IA externe n’est utilisée que si vous configurez votre propre clé API dans les Paramètres.',
+    errorBlocked:
+      'Vous avez bloqué le microphone. Autorisez-le depuis l’icône de la barre d’adresse et réessayez.',
+    errorGeneric:
+      'Impossible d’accéder au microphone. Vérifiez qu’un microphone est connecté.',
+  },
+};
+
+const t = makeT(dict);
 
 type Status = 'idle' | 'asking' | 'granted' | 'denied';
 
@@ -22,14 +68,14 @@ export default function Options(): JSX.Element {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       // Cerramos el stream: solo queríamos que se concediera el permiso.
-      stream.getTracks().forEach((t) => t.stop());
+      stream.getTracks().forEach((track) => track.stop());
       setStatus('granted');
     } catch (err: unknown) {
       setStatus('denied');
       setError(
         err instanceof Error && err.name === 'NotAllowedError'
-          ? 'Bloqueaste el micrófono. Permítelo desde el icono de la barra de direcciones y reintenta.'
-          : 'No se pudo acceder al micrófono. Revisa que haya uno conectado.'
+          ? t('errorBlocked')
+          : t('errorGeneric')
       );
     }
   };
@@ -45,17 +91,16 @@ export default function Options(): JSX.Element {
         </div>
 
         <div>
-          <h1 className="text-lg font-extrabold text-slate-800">Permiso de micrófono</h1>
+          <h1 className="text-lg font-extrabold text-slate-800">{t('micPermissionTitle')}</h1>
           <p className="mt-1 text-sm leading-relaxed text-slate-500">
-            Para llenar el formulario dictando por voz, Trinity necesita permiso de
-            micrófono. Concédelo aquí una sola vez; después funcionará desde el popup.
+            {t('micPermissionDescription')}
           </p>
         </div>
 
         {status === 'granted' ? (
           <div className="flex items-center gap-2 rounded-xl border border-emerald-100 bg-emerald-50 px-3 py-2.5 text-sm font-semibold text-emerald-700">
             <CheckCircle2 size={18} className="shrink-0" />
-            <span>¡Listo! Ya puedes cerrar esta pestaña y dictar desde el popup.</span>
+            <span>{t('micGranted')}</span>
           </div>
         ) : (
           <button
@@ -70,7 +115,7 @@ export default function Options(): JSX.Element {
             ) : (
               <Mic size={18} />
             )}
-            <span>{status === 'asking' ? 'Solicitando…' : 'Permitir micrófono'}</span>
+            <span>{status === 'asking' ? t('requesting') : t('allowMic')}</span>
           </button>
         )}
 
@@ -81,10 +126,7 @@ export default function Options(): JSX.Element {
           </div>
         ) : null}
 
-        <p className="text-[11px] leading-relaxed text-slate-400">
-          El audio lo procesa el navegador para transcribirlo. Solo se usa una IA externa
-          si configuras tu propia API key en Ajustes.
-        </p>
+        <p className="text-[11px] leading-relaxed text-slate-400">{t('audioNote')}</p>
       </div>
     </div>
   );

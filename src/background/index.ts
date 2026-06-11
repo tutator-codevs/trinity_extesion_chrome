@@ -10,6 +10,62 @@ import {
   stopActivity,
   TIMER_CHECK_MINUTES,
 } from '../utils/timer';
+import { makeT, type Dict } from '../i18n/locale';
+
+const dict: Dict = {
+  es: {
+    eodTitle: 'Cierre de día · Trinity',
+    eodOpen: 'Es hora de cerrar tu día. Abre Trinity para revisar y registrar tus horas.',
+    eodNone: 'No has registrado horas hoy (objetivo {target}h). ¿Las registramos?',
+    eodPartial: 'Llevas {worked}h de {target}h. Te faltan {remaining}h por registrar.',
+    eodDone: '¡Listo! Registraste {worked}h hoy. Buen trabajo.',
+    timerStillTitle: '¿Sigues en tu actividad?',
+    timerStillMessage: 'Llevas {min} min en "{label}".',
+    timerDoneTitle: 'Actividad terminada · Trinity',
+    timerDoneMessage: 'Registra {start}–{end}. Abre Trinity para guardar.',
+    timerStartedTitle: 'Cronómetro iniciado · Trinity',
+    timerStartedMessage: 'Registrando "Reunión". Te avisaré en 30 min.',
+    btnLog: 'Registrar horas',
+    btnYes: 'Sigo',
+    btnDone: 'Terminé',
+  },
+  en: {
+    eodTitle: 'End of day · Trinity',
+    eodOpen: "It's time to wrap up your day. Open Trinity to review and log your hours.",
+    eodNone: "You haven't logged any hours today (target {target}h). Shall we log them?",
+    eodPartial: "You're at {worked}h of {target}h. {remaining}h left to log.",
+    eodDone: 'Done! You logged {worked}h today. Nice work.',
+    timerStillTitle: 'Still in the meeting?',
+    timerStillMessage: "You're at {min} min in \"{label}\".",
+    timerDoneTitle: 'Activity finished · Trinity',
+    timerDoneMessage: 'Log {start}–{end}. Open Trinity to save.',
+    timerStartedTitle: 'Timer started · Trinity',
+    timerStartedMessage: 'Logging "Meeting". I\'ll remind you in 30 min.',
+    btnLog: 'Log hours',
+    btnYes: 'Yes',
+    btnDone: 'Done',
+  },
+  fr: {
+    eodTitle: 'Fin de journée · Trinity',
+    eodOpen:
+      'Il est temps de clôturer votre journée. Ouvrez Trinity pour vérifier et saisir vos heures.',
+    eodNone:
+      'Vous n’avez saisi aucune heure aujourd’hui (objectif {target}h). On les saisit ?',
+    eodPartial: 'Vous êtes à {worked}h sur {target}h. Il reste {remaining}h à saisir.',
+    eodDone: 'Terminé ! Vous avez saisi {worked}h aujourd’hui. Beau travail.',
+    timerStillTitle: 'Toujours en réunion ?',
+    timerStillMessage: 'Vous êtes à {min} min sur « {label} ».',
+    timerDoneTitle: 'Activité terminée · Trinity',
+    timerDoneMessage: 'Saisir {start}–{end}. Ouvrez Trinity pour enregistrer.',
+    timerStartedTitle: 'Chronomètre démarré · Trinity',
+    timerStartedMessage: 'Enregistrement de « Réunion ». Je vous préviendrai dans 30 min.',
+    btnLog: 'Saisir les heures',
+    btnYes: 'Oui',
+    btnDone: 'Plus tard',
+  },
+};
+
+const t = makeT(dict);
 
 const ALARM_END_OF_DAY = 'trinity-end-of-day';
 const ALARM_TIMER_CHECK = 'trinity-timer-check';
@@ -113,13 +169,17 @@ async function handleEndOfDay(): Promise<void> {
   const { targetHours } = settings;
   let message: string;
   if (worked === null) {
-    message = 'Es hora de cerrar tu día. Abre Trinity para revisar y registrar tus horas.';
+    message = t('eodOpen');
   } else if (worked <= 0) {
-    message = `No has registrado horas hoy (objetivo ${targetHours}h). ¿Las registramos?`;
+    message = t('eodNone', { target: targetHours });
   } else if (worked < targetHours) {
-    message = `Llevas ${worked}h de ${targetHours}h. Te faltan ${targetHours - worked}h por registrar.`;
+    message = t('eodPartial', {
+      worked,
+      target: targetHours,
+      remaining: targetHours - worked,
+    });
   } else {
-    message = `¡Listo! Registraste ${worked}h hoy. Buen trabajo.`;
+    message = t('eodDone', { worked });
   }
 
   // eslint-disable-next-line no-console
@@ -128,9 +188,9 @@ async function handleEndOfDay(): Promise<void> {
   await notify(NOTIF_END_OF_DAY, {
     type: 'basic',
     iconUrl: icon(),
-    title: 'Cierre de día · Trinity',
+    title: t('eodTitle'),
     message,
-    buttons: [{ title: 'Registrar horas' }],
+    buttons: [{ title: t('btnLog') }],
     priority: 2,
     requireInteraction: true,
   });
@@ -148,9 +208,9 @@ async function handleTimerCheck(): Promise<void> {
   notify(NOTIF_TIMER, {
     type: 'basic',
     iconUrl: icon(),
-    title: '¿Sigues en tu actividad?',
-    message: `Llevas ${elapsedMinutes(timer)} min en "${timer.label}".`,
-    buttons: [{ title: 'Sigo' }, { title: 'Terminé' }],
+    title: t('timerStillTitle'),
+    message: t('timerStillMessage', { min: elapsedMinutes(timer), label: timer.label }),
+    buttons: [{ title: t('btnYes') }, { title: t('btnDone') }],
     priority: 2,
     requireInteraction: true,
   });
@@ -166,9 +226,12 @@ async function toggleTimer(): Promise<void> {
       notify(NOTIF_TIMER_DONE, {
         type: 'basic',
         iconUrl: icon(),
-        title: 'Actividad terminada · Trinity',
-        message: `Registra ${initial.startTime}–${initial.endTime}. Abre Trinity para guardar.`,
-        buttons: [{ title: 'Registrar horas' }],
+        title: t('timerDoneTitle'),
+        message: t('timerDoneMessage', {
+          start: initial.startTime ?? '',
+          end: initial.endTime ?? '',
+        }),
+        buttons: [{ title: t('btnLog') }],
         priority: 2,
       });
     }
@@ -178,8 +241,8 @@ async function toggleTimer(): Promise<void> {
     notify(`${NOTIF_TIMER}-started`, {
       type: 'basic',
       iconUrl: icon(),
-      title: 'Cronómetro iniciado · Trinity',
-      message: 'Registrando "Reunión". Te avisaré en 30 min.',
+      title: t('timerStartedTitle'),
+      message: t('timerStartedMessage'),
       priority: 1,
     });
   }
