@@ -1,0 +1,61 @@
+name: Release extension
+
+# Publica las builds en GitHub Releases.
+# - Al pushear un tag `v*` (p.ej. `git tag v0.1.0 && git push origin v0.1.0`):
+#   compila Chrome y Firefox, empaqueta cada uno en ZIP y los adjunta al Release.
+# - Ejecución manual (workflow_dispatch): compila y sube los ZIP como artefactos
+#   descargables del run (sin crear Release).
+#
+# Instalación de los ZIP:
+# - Chrome/Edge/Brave: descomprimir → chrome://extensions → modo desarrollador →
+#   "Cargar descomprimida".
+# - Firefox: requiere un .xpi firmado para instalación normal (no cubierto aquí).
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # pnpm/action-setup lee la versión de `packageManager` en package.json.
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Instalar dependencias
+        run: pnpm install --frozen-lockfile
+
+      - name: Compilar (tsc + Vite) Chrome y Firefox
+        run: |
+          pnpm build
+          pnpm build:firefox
+
+      - name: Empaquetar ZIPs
+        run: |
+          mkdir -p dist
+          ( cd dist_chrome && zip -qr "../dist/trinity-extension-chrome-${{ github.ref_name }}.zip" . )
+          ( cd dist_firefox && zip -qr "../dist/trinity-extension-firefox-${{ github.ref_name }}.zip" . )
+
+      - name: Subir artefactos del run (siempre)
+        uses: actions/upload-artifact@v4
+        with:
+          name: trinity-extension-${{ github.ref_name }}
+          path: dist/*.zip
+
+      - name: Crear Release con los ZIP (solo en tags)
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*.zip
+          generate_release_notes: true
