@@ -1,5 +1,6 @@
 import browser from 'webextension-polyfill';
 
+import { decryptString, encryptString, type EncryptedBlob } from './vault';
 import type {
   ActiveTimer,
   RegisterInitial,
@@ -14,11 +15,18 @@ const STORAGE_KEYS = {
   TOKEN: 'auth_token',
   TOKEN_EXPIRES_AT: 'auth_token_expires_at',
   USER: 'auth_user',
+  CREDENTIALS: 'auth_credentials',
   TEMPLATES: 'work_templates',
   SETTINGS: 'settings',
   ACTIVE_TIMER: 'active_timer',
   PENDING_REGISTRATION: 'pending_registration',
 };
+
+/** Credenciales para re-login automático al caducar el token (no hay refresh-token). */
+export interface StoredCredentials {
+  username: string;
+  password: string;
+}
 
 // El token del backend dura ~4h. Si el login no informa expiración, asumimos este TTL.
 const DEFAULT_TOKEN_TTL_MS = 4 * 60 * 60 * 1000;
@@ -76,7 +84,28 @@ export const storage = {
       STORAGE_KEYS.TOKEN,
       STORAGE_KEYS.TOKEN_EXPIRES_AT,
       STORAGE_KEYS.USER,
+      STORAGE_KEYS.CREDENTIALS,
     ]);
+  },
+
+  /** Guarda las credenciales cifradas (AES-GCM) para poder re-loguear al expirar. */
+  async saveCredentials(creds: StoredCredentials): Promise<void> {
+    const blob = await encryptString(JSON.stringify(creds));
+    await browser.storage.local.set({ [STORAGE_KEYS.CREDENTIALS]: blob });
+  },
+
+  /** Recupera y descifra las credenciales; null si no hay o no se pueden descifrar. */
+  async getCredentials(): Promise<StoredCredentials | null> {
+    const data = await browser.storage.local.get(STORAGE_KEYS.CREDENTIALS);
+    const blob = data[STORAGE_KEYS.CREDENTIALS] as EncryptedBlob | undefined;
+    if (!blob) return null;
+    const json = await decryptString(blob);
+    if (!json) return null;
+    try {
+      return JSON.parse(json) as StoredCredentials;
+    } catch {
+      return null;
+    }
   },
 
   async getTemplates(): Promise<WorkTemplate[]> {

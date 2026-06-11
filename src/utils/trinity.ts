@@ -1,7 +1,7 @@
 // Servicio de dominio: envuelve los endpoints del backend de Trinity con tipos.
 // La UI usa estas funciones en lugar de llamar a `api` directamente.
 
-import { api } from './api';
+import { api, configureReauth } from './api';
 import { storage } from './storage';
 import type {
   CatalogItem,
@@ -40,8 +40,26 @@ export async function login(username: string, password: string): Promise<User> {
 
   await storage.setToken(res.token, res.expiresAt);
   await storage.setUser(user);
+  // Guarda credenciales cifradas para re-loguear al caducar el token (sin refresh-token).
+  await storage.saveCredentials({ username, password });
   return user;
 }
+
+/** Re-login silencioso con las credenciales guardadas. Devuelve el usuario o null
+ *  (no hay credenciales, o son inválidas). Persiste el token nuevo. */
+export async function reauthenticate(): Promise<User | null> {
+  const creds = await storage.getCredentials();
+  if (!creds) return null;
+  try {
+    return await login(creds.username, creds.password);
+  } catch {
+    return null;
+  }
+}
+
+// Conecta el re-login al cliente API: ante un 401, intenta renovar el token y
+// reintentar la petición de forma transparente.
+configureReauth(async () => (await reauthenticate()) !== null);
 
 /** Resumen de horas del usuario en un rango (instantes ISO UTC). */
 export function getSummary(userId: string, start: string, end: string): Promise<Summary> {

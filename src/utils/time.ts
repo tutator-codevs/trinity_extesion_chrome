@@ -122,3 +122,27 @@ export function dayRangeUtc(date: string): { start: string; end: string } {
   const next = new Date(day.getFullYear(), day.getMonth(), day.getDate() + 1, 0, 0, 0, 0);
   return { start: day.toISOString(), end: next.toISOString() };
 }
+
+/** Rango [primer día del mes 00:00, mañana 00:00) en ISO UTC; es decir, el mes
+ *  local actual hasta el final del día de hoy ("a la fecha actual"). */
+export function currentMonthToDateRangeUtc(): { start: string; end: string } {
+  const now = new Date();
+  const firstOfMonth = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
+  const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0, 0);
+  return { start: firstOfMonth.toISOString(), end: tomorrow.toISOString() };
+}
+
+/** Fecha local 'YYYY-MM-DD' del lunes de la semana actual. */
+export function currentWeekStartLocalDate(): string {
+  const now = new Date();
+  const daysSinceMonday = (now.getDay() + 6) % 7; // getDay(): 0=domingo
+  return toLocalDateString(
+    new Date(now.getFullYear(), now.getMonth(), now.getDate() - daysSinceMonday)
+  );
+}
+
+/** Fecha local 'YYYY-MM-DD' del primer día del mes actual. */
+export function currentMonthStartLocalDate(): string {
+  const now = new Date();
+  return toLocalDateString(new Date(now.getFullYear(), now.getMonth(), 1));
+}

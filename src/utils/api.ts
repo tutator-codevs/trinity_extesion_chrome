@@ -15,8 +15,34 @@ interface RequestOptions extends RequestInit {
   useAuth?: boolean;
 }
 
+/** Re-login: obtiene un token nuevo. true si lo consiguió. Lo registra `trinity.ts`. */
+type ReauthHandler = () => Promise<boolean>;
+let reauthHandler: ReauthHandler | null = null;
+let reauthInFlight: Promise<boolean> | null = null;
+
+/** Registra cómo re-loguear cuando caduca el token (inyectado para evitar ciclo de
+ *  imports api↔trinity). Sin handler, un 401 limpia la sesión como antes. */
+export function configureReauth(handler: ReauthHandler): void {
+  reauthHandler = handler;
+}
+
+/** Ejecuta el re-login compartiendo una sola llamada entre 401 concurrentes. */
+function reauthenticate(): Promise<boolean> {
+  if (!reauthHandler) return Promise.resolve(false);
+  if (!reauthInFlight) {
+    reauthInFlight = reauthHandler().finally(() => {
+      reauthInFlight = null;
+    });
+  }
+  return reauthInFlight;
+}
+
 export const api = {
-  async request<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
+  async request<T>(
+    endpoint: string,
+    options: RequestOptions = {},
+    retried = false
+  ): Promise<T> {
     const { useAuth = true, ...fetchOptions } = options;
     const url = `${BASE_URL}${endpoint}`;
 
@@ -35,6 +61,11 @@ export const api = {
     const response = await fetch(url, { ...fetchOptions, headers });
 
     if (response.status === 401) {
+      // Token caducado/ inválido. Sin refresh-token: intentamos re-login con las
+      // credenciales guardadas y reintentamos la petición original una sola vez.
+      if (useAuth && !retried && (await reauthenticate())) {
+        return this.request<T>(endpoint, options, true);
+      }
       await storage.clearAuth();
       throw new AuthError();
     }

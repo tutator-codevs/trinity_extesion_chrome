@@ -4,6 +4,70 @@ import { Mic, Square, X, Loader2, Sparkles, AlertTriangle, ExternalLink } from '
 
 import { isVoiceSupported, startRecognition, type VoiceSession } from '../utils/voice';
 import { BRAND_GRADIENT } from '../lib/brand';
+import { makeT, type Dict } from '../i18n/locale';
+
+const dict: Dict = {
+  es: {
+    title: 'Llenado por voz',
+    close: 'Cerrar',
+    notSupported: 'Tu navegador no soporta dictado por voz. Usa Chrome, Edge o Brave.',
+    notSupportedShort: 'Tu navegador no soporta dictado por voz.',
+    stop: 'Detener',
+    speak: 'Hablar',
+    listeningHint: 'Escuchando… toca para detener',
+    idleHint: 'Toca el micrófono y dicta tu registro',
+    placeholder: 'Ej. "Proyecto Pivot, desarrollo fullstack, de 9 a 11"',
+    micPermissionError: 'Falta permiso de micrófono. Concédelo una vez para activar el dictado.',
+    listenError: 'No se pudo escuchar. Revisa el micrófono e inténtalo de nuevo.',
+    grantMicPermission: 'Conceder permiso de micrófono',
+    interpreting: 'Interpretando…',
+    fillForm: 'Llenar formulario',
+    aiHelpEnabled: 'Se interpreta localmente y, si hace falta, con tu IA configurada.',
+    aiHelpDisabled: 'Interpretación local (sin IA). Configura una IA en Ajustes para frases complejas.',
+  },
+  en: {
+    title: 'Fill by voice',
+    close: 'Close',
+    notSupported: "Your browser doesn't support voice dictation. Use Chrome, Edge or Brave.",
+    notSupportedShort: "Your browser doesn't support voice dictation.",
+    stop: 'Stop',
+    speak: 'Speak now',
+    listeningHint: 'Listening… tap to stop',
+    idleHint: 'Tap the microphone and dictate your entry',
+    placeholder: 'E.g. "Pivot project, fullstack development, from 9 to 11"',
+    micPermissionError: 'Microphone permission required. Grant it once to enable dictation.',
+    listenError: "Couldn't listen. Check your microphone and try again.",
+    grantMicPermission: 'Grant microphone permission',
+    interpreting: 'Processing…',
+    fillForm: 'Fill form',
+    aiHelpEnabled: "It's interpreted locally and, if needed, with your configured AI.",
+    aiHelpDisabled: 'Local interpretation (no AI). Configure an AI in Settings for complex phrases.',
+  },
+  fr: {
+    title: 'Remplir à la voix',
+    close: 'Fermer',
+    notSupported:
+      'Votre navigateur ne prend pas en charge la dictée vocale. Utilisez Chrome, Edge ou Brave.',
+    notSupportedShort: 'Votre navigateur ne prend pas en charge la dictée vocale.',
+    stop: 'Arrêter',
+    speak: 'Parlez maintenant',
+    listeningHint: 'Écoute… touchez pour arrêter',
+    idleHint: 'Touchez le microphone et dictez votre saisie',
+    placeholder: 'Ex. : « Projet Pivot, développement fullstack, de 9 à 11 »',
+    micPermissionError:
+      'Autorisation du microphone requise. Accordez-la une fois pour activer la dictée.',
+    listenError: 'Impossible d’écouter. Vérifiez votre microphone et réessayez.',
+    grantMicPermission: 'Accorder l’autorisation du microphone',
+    interpreting: 'Traitement…',
+    fillForm: 'Remplir le formulaire',
+    aiHelpEnabled:
+      'C’est interprété localement et, si nécessaire, avec votre IA configurée.',
+    aiHelpDisabled:
+      'Interprétation locale (sans IA). Configurez une IA dans Réglages pour les phrases complexes.',
+  },
+};
+
+const t = makeT(dict);
 
 export type VoiceLang = 'es' | 'en';
 
@@ -69,17 +133,13 @@ export default function VoicePanel({
       onError: (code) => {
         const permission = code === 'not-allowed' || code === 'service-not-allowed';
         setNeedsPermission(permission);
-        setError(
-          permission
-            ? 'Falta permiso de micrófono. Concédelo una vez para activar el dictado.'
-            : 'No se pudo escuchar. Revisa el micrófono e inténtalo de nuevo.'
-        );
+        setError(permission ? t('micPermissionError') : t('listenError'));
         setListening(false);
       },
       onEnd: () => setListening(false),
     });
     if (!session) {
-      setError('Tu navegador no soporta dictado por voz.');
+      setError(t('notSupportedShort'));
       return;
     }
     sessionRef.current = session;
@@ -100,12 +160,12 @@ export default function VoicePanel({
       <div className="flex items-center justify-between">
         <h3 className="flex items-center gap-1.5 text-sm font-extrabold text-slate-800">
           <Mic size={15} className="text-indigo-600" />
-          Llenado por voz
+          {t('title')}
         </h3>
         <button
           type="button"
           onClick={onClose}
-          aria-label="Cerrar"
+          aria-label={t('close')}
           className="flex size-7 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700"
         >
           <X size={16} />
@@ -115,7 +175,7 @@ export default function VoicePanel({
       {!supported ? (
         <div className="flex items-center gap-2 rounded-xl border border-amber-100 bg-amber-50 px-3 py-2 text-xs font-medium text-amber-700">
           <AlertTriangle size={14} className="shrink-0" />
-          <span>Tu navegador no soporta dictado por voz. Usa Chrome, Edge o Brave.</span>
+          <span>{t('notSupported')}</span>
         </div>
       ) : (
         <>
@@ -142,12 +202,12 @@ export default function VoicePanel({
               listening ? 'animate-pulse' : ''
             }`}
             style={{ background: listening ? '#e11d48' : BRAND_GRADIENT }}
-            aria-label={listening ? 'Detener' : 'Hablar'}
+            aria-label={listening ? t('stop') : t('speak')}
           >
             {listening ? <Square size={22} /> : <Mic size={24} />}
           </button>
           <p className="text-center text-[11px] font-medium text-slate-400">
-            {listening ? 'Escuchando… toca para detener' : 'Toca el micrófono y dicta tu registro'}
+            {listening ? t('listeningHint') : t('idleHint')}
           </p>
 
           <textarea
@@ -156,7 +216,7 @@ export default function VoicePanel({
               baseRef.current = `${e.target.value} `;
               setTranscript(e.target.value);
             }}
-            placeholder={'Ej. "Proyecto Pivot, desarrollo fullstack, de 9 a 11"'}
+            placeholder={t('placeholder')}
             rows={3}
             className="resize-none rounded-lg border border-slate-200 px-2.5 py-1.5 text-sm leading-snug text-slate-800 outline-none focus:border-indigo-400"
           />
@@ -174,7 +234,7 @@ export default function VoicePanel({
                   className="flex items-center justify-center gap-1.5 rounded-lg bg-rose-600 py-1.5 text-xs font-bold text-white hover:bg-rose-700"
                 >
                   <ExternalLink size={13} />
-                  Conceder permiso de micrófono
+                  {t('grantMicPermission')}
                 </button>
               ) : null}
             </div>
@@ -188,12 +248,10 @@ export default function VoicePanel({
             style={{ background: BRAND_GRADIENT }}
           >
             {busy ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
-            <span>{busy ? 'Interpretando…' : 'Llenar formulario'}</span>
+            <span>{busy ? t('interpreting') : t('fillForm')}</span>
           </button>
           <p className="text-center text-[10px] text-slate-400">
-            {aiEnabled
-              ? 'Se interpreta localmente y, si hace falta, con tu IA configurada.'
-              : 'Interpretación local (sin IA). Configura una IA en Ajustes para frases complejas.'}
+            {aiEnabled ? t('aiHelpEnabled') : t('aiHelpDisabled')}
           </p>
         </>
       )}
