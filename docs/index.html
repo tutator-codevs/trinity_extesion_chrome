@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Trinity · Descargar extensión</title>
+    <meta
+      name="description"
+      content="Descarga la extensión Trinity para registrar tus horas de trabajo en segundos."
+    />
+    <style>
+      :root {
+        --brand: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #db2777 100%);
+        --ink: #0f172a;
+        --muted: #64748b;
+        --line: #e2e8f0;
+        --bg: #f8fafc;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        color: var(--ink);
+        background: radial-gradient(1200px 600px at 50% -10%, #eef2ff 0%, var(--bg) 55%);
+        min-height: 100vh;
+      }
+      .wrap { max-width: 760px; margin: 0 auto; padding: 48px 20px 64px; }
+      header { text-align: center; margin-bottom: 36px; }
+      .logo {
+        width: 64px; height: 64px; border-radius: 18px; background: var(--brand);
+        display: inline-flex; align-items: center; justify-content: center;
+        box-shadow: 0 12px 30px -10px rgba(79, 70, 229, 0.55); margin-bottom: 14px;
+      }
+      .logo svg { color: #fff; }
+      h1 { font-size: 30px; font-weight: 800; letter-spacing: -0.02em; margin: 0; }
+      .sub { color: var(--muted); margin: 6px 0 0; font-size: 15px; }
+      .release {
+        display: inline-flex; gap: 8px; align-items: center; margin-top: 14px;
+        font-size: 13px; color: var(--muted);
+      }
+      .badge {
+        background: #eef2ff; color: #4338ca; font-weight: 700; border-radius: 999px;
+        padding: 3px 10px; font-size: 12px;
+      }
+      .cards { display: grid; gap: 16px; grid-template-columns: 1fr 1fr; }
+      @media (max-width: 560px) { .cards { grid-template-columns: 1fr; } }
+      .card {
+        background: #fff; border: 1px solid var(--line); border-radius: 18px; padding: 22px;
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04); display: flex; flex-direction: column;
+      }
+      .card h2 { margin: 0 0 4px; font-size: 18px; font-weight: 800; }
+      .card .note { color: var(--muted); font-size: 13px; margin: 0 0 16px; line-height: 1.5; }
+      .btn {
+        margin-top: auto; display: inline-flex; align-items: center; justify-content: center;
+        gap: 8px; border: 0; border-radius: 12px; padding: 12px 16px; font-size: 14px;
+        font-weight: 700; color: #fff; background: var(--brand); text-decoration: none;
+        cursor: pointer; transition: opacity 0.15s ease;
+      }
+      .btn:hover { opacity: 0.93; }
+      .btn[aria-disabled="true"] { opacity: 0.5; pointer-events: none; }
+      .steps { list-style: none; padding: 0; margin: 0 0 16px; }
+      .steps li {
+        position: relative; padding-left: 22px; font-size: 13px; color: #475569;
+        margin-bottom: 6px; line-height: 1.45;
+      }
+      .steps li::before {
+        content: ""; position: absolute; left: 0; top: 7px; width: 7px; height: 7px;
+        border-radius: 999px; background: #c7d2fe;
+      }
+      .foot { text-align: center; margin-top: 36px; color: var(--muted); font-size: 13px; }
+      .foot a { color: #6366f1; font-weight: 600; text-decoration: none; }
+      .codevs { font-weight: 800; background: var(--brand); -webkit-background-clip: text; background-clip: text; color: transparent; }
+      .error {
+        background: #fff1f2; border: 1px solid #fecdd3; color: #be123c; border-radius: 12px;
+        padding: 14px 16px; font-size: 14px; text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <span class="logo" aria-hidden="true">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="9"></circle>
+            <path d="M12 7v5l3 2"></path>
+          </svg>
+        </span>
+        <h1>Trinity</h1>
+        <p class="sub">Registra tus horas de trabajo en segundos.</p>
+        <div class="release" id="release-info" hidden>
+          <span class="badge" id="release-tag">—</span>
+          <span id="release-date"></span>
+        </div>
+      </header>
+
+      <div id="status"></div>
+
+      <div class="cards">
+        <section class="card">
+          <h2>Chrome · Edge · Brave</h2>
+          <p class="note">Manifest V3. Se carga en modo desarrollador.</p>
+          <ul class="steps">
+            <li>Descarga y descomprime el ZIP.</li>
+            <li>Abre <strong>chrome://extensions</strong>.</li>
+            <li>Activa el <strong>Modo de desarrollador</strong> (arriba a la derecha).</li>
+            <li>Pulsa <strong>«Cargar descomprimida»</strong> y elige la carpeta.</li>
+          </ul>
+          <a class="btn" id="dl-chrome" href="#" aria-disabled="true">Descargar para Chrome</a>
+        </section>
+
+        <section class="card">
+          <h2>Firefox</h2>
+          <p class="note">
+            El ZIP se carga como complemento temporal; la instalación permanente requiere un
+            <em>.xpi</em> firmado.
+          </p>
+          <ul class="steps">
+            <li>Descarga el ZIP.</li>
+            <li>Abre <strong>about:debugging#/runtime/this-firefox</strong>.</li>
+            <li>Pulsa <strong>«Cargar complemento temporal»</strong>.</li>
+            <li>Selecciona el <strong>manifest.json</strong> dentro del ZIP descomprimido.</li>
+          </ul>
+          <a class="btn" id="dl-firefox" href="#" aria-disabled="true">Descargar para Firefox</a>
+        </section>
+      </div>
+
+      <p class="foot">
+        ¿Problemas? Ve a la
+        <a id="releases-link" href="#" target="_blank" rel="noopener">página de Releases</a>.
+        <br />
+        by <a class="codevs" href="https://codevs.tech/" target="_blank" rel="noopener">Codevs</a>
+      </p>
+    </div>
+
+    <script>
+      // Repositorio en GitHub (owner/repo). Ajusta si renombras el repo.
+      var OWNER = 'tutator-codevs';
+      var REPO = 'trinity_extesion_chrome';
+      var RELEASES_URL = 'https://github.com/' + OWNER + '/' + REPO + '/releases';
+
+      document.getElementById('releases-link').href = RELEASES_URL;
+
+      function fmtDate(iso) {
+        try {
+          return new Intl.DateTimeFormat('es', {
+            day: 'numeric', month: 'long', year: 'numeric',
+          }).format(new Date(iso));
+        } catch (e) {
+          return '';
+        }
+      }
+
+      function setButton(id, asset) {
+        var a = document.getElementById(id);
+        if (asset) {
+          a.href = asset.browser_download_url;
+          a.removeAttribute('aria-disabled');
+        }
+      }
+
+      fetch('https://api.github.com/repos/' + OWNER + '/' + REPO + '/releases/latest', {
+        headers: { Accept: 'application/vnd.github+json' },
+      })
+        .then(function (r) {
+          if (!r.ok) throw new Error('No hay Releases publicados todavía.');
+          return r.json();
+        })
+        .then(function (rel) {
+          var info = document.getElementById('release-info');
+          document.getElementById('release-tag').textContent = rel.tag_name || 'última';
+          document.getElementById('release-date').textContent = rel.published_at
+            ? 'Publicada el ' + fmtDate(rel.published_at)
+            : '';
+          info.hidden = false;
+
+          var assets = rel.assets || [];
+          var chrome = assets.find(function (a) {
+            return /chrome/i.test(a.name) && /\.zip$/i.test(a.name);
+          });
+          var firefox = assets.find(function (a) {
+            return /firefox/i.test(a.name) && /\.zip$/i.test(a.name);
+          });
+          setButton('dl-chrome', chrome);
+          setButton('dl-firefox', firefox);
+
+          if (!chrome && !firefox) {
+            document.getElementById('status').innerHTML =
+              '<div class="error">El último Release no tiene ZIP adjuntos. Usa la página de Releases.</div>';
+          }
+        })
+        .catch(function (err) {
+          document.getElementById('status').innerHTML =
+            '<div class="error">' +
+            (err && err.message ? err.message : 'No se pudo cargar la última versión.') +
+            ' Abre la <a href="' + RELEASES_URL + '">página de Releases</a>.</div>';
+        });
+    </script>
+  </body>
+</html>
