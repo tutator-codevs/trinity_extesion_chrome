@@ -67,6 +67,36 @@
         content: ""; position: absolute; left: 0; top: 7px; width: 7px; height: 7px;
         border-radius: 999px; background: #c7d2fe;
       }
+      .section { margin-top: 44px; }
+      .section h3 {
+        font-size: 13px; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase;
+        color: #94a3b8; margin: 0 0 16px; text-align: center;
+      }
+      .features { display: grid; gap: 12px; grid-template-columns: 1fr 1fr; }
+      @media (max-width: 560px) { .features { grid-template-columns: 1fr; } }
+      .feature {
+        display: flex; gap: 12px; align-items: flex-start; background: #fff;
+        border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px;
+      }
+      .feature .ic {
+        flex: 0 0 auto; width: 34px; height: 34px; border-radius: 10px; background: #eef2ff;
+        display: flex; align-items: center; justify-content: center; font-size: 17px;
+      }
+      .feature b { display: block; font-size: 14px; margin-bottom: 2px; }
+      .feature span { font-size: 12.5px; color: var(--muted); line-height: 1.45; }
+      .roadmap {
+        list-style: none; padding: 18px 20px; margin: 0; background: #fff;
+        border: 1px dashed #cbd5e1; border-radius: 16px;
+      }
+      .roadmap li {
+        position: relative; padding-left: 26px; font-size: 13.5px; color: #475569;
+        line-height: 1.5; margin-bottom: 10px;
+      }
+      .roadmap li:last-child { margin-bottom: 0; }
+      .roadmap li::before {
+        content: "○"; position: absolute; left: 4px; top: -1px; color: #a5b4fc;
+        font-size: 15px; font-weight: 700;
+      }
       .foot { text-align: center; margin-top: 36px; color: var(--muted); font-size: 13px; }
       .foot a { color: #6366f1; font-weight: 600; text-decoration: none; }
       .codevs { font-weight: 800; background: var(--brand); -webkit-background-clip: text; background-clip: text; color: transparent; }
@@ -124,6 +154,92 @@
           <a class="btn" id="dl-firefox" href="#" aria-disabled="true">Descargar para Firefox</a>
         </section>
       </div>
+
+      <section class="section">
+        <h3>Qué puedes hacer</h3>
+        <div class="features">
+          <div class="feature">
+            <span class="ic">⏱️</span>
+            <div>
+              <b>Registro en segundos</b>
+              <span>Formulario propio rápido, sin entrar a la web de Tutator.</span>
+            </div>
+          </div>
+          <div class="feature">
+            <span class="ic">🔁</span>
+            <div>
+              <b>Plantillas reutilizables</b>
+              <span>Guarda tareas recurrentes y aplícalas con un clic.</span>
+            </div>
+          </div>
+          <div class="feature">
+            <span class="ic">🟢</span>
+            <div>
+              <b>Cronómetro de actividad</b>
+              <span>Inicia una reunión; al terminar se convierte en un registro.</span>
+            </div>
+          </div>
+          <div class="feature">
+            <span class="ic">🌙</span>
+            <div>
+              <b>Cierre de día</b>
+              <span>Aviso a la hora que elijas para no olvidar tus horas.</span>
+            </div>
+          </div>
+          <div class="feature">
+            <span class="ic">🎙️</span>
+            <div>
+              <b>Llenado por voz</b>
+              <span>Dicta tu actividad; con respaldo de IA opcional.</span>
+            </div>
+          </div>
+          <div class="feature">
+            <span class="ic">📊</span>
+            <div>
+              <b>Resumen de horas</b>
+              <span>Tus horas registradas por día, semana y mes.</span>
+            </div>
+          </div>
+          <div class="feature">
+            <span class="ic">⌨️</span>
+            <div>
+              <b>Atajo de teclado</b>
+              <span>Abre la extensión al instante sin usar el ratón.</span>
+            </div>
+          </div>
+          <div class="feature">
+            <span class="ic">🌐</span>
+            <div>
+              <b>Multi-idioma</b>
+              <span>Español, inglés y francés según el idioma de tu navegador.</span>
+            </div>
+          </div>
+          <div class="feature">
+            <span class="ic">🔐</span>
+            <div>
+              <b>Sesión segura</b>
+              <span>Re-login automático al caducar, con credenciales cifradas.</span>
+            </div>
+          </div>
+          <div class="feature">
+            <span class="ic">🧩</span>
+            <div>
+              <b>Multi-navegador</b>
+              <span>Funciona en Chrome, Edge, Brave y Firefox (Manifest V3).</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <h3>En camino</h3>
+        <ul class="roadmap">
+          <li>Publicación en la Chrome Web Store y <em>.xpi</em> firmado para Firefox (instalación de un clic).</li>
+          <li>Sincronizar las plantillas con el backend (hoy se guardan solo en este equipo).</li>
+          <li>Aviso antes de que la sesión expire.</li>
+          <li>Mejoras de rendimiento y pulido de la interfaz.</li>
+        </ul>
+      </section>
 
       <p class="foot">
         ¿Problemas? Ve a la
