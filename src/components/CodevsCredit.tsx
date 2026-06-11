@@ -8,6 +8,15 @@ import { BRAND_GRADIENT } from '../lib/brand';
 export default function CodevsCredit({ className = '' }: { className?: string }): JSX.Element {
   return (
     <p className={`text-center text-[11px] font-medium text-slate-400 ${className}`}>
+      <a
+        href="https://trinity.tutator.net/"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="font-semibold text-slate-500 transition-colors hover:text-slate-700"
+      >
+        trinity.tutator.net
+      </a>
+      <span className="mx-1.5 text-slate-300">·</span>
       by{' '}
       <a
         href="https://codevs.tech/"
