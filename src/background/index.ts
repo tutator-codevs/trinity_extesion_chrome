@@ -75,6 +75,16 @@ const NOTIF_TIMER_DONE = 'trinity-timer-done';
 
 const icon = () => browser.runtime.getURL('icon128.png');
 
+/** Rechaza si la promesa no resuelve en `ms`; evita que una red lenta bloquee el aviso. */
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) => {
+      setTimeout(() => reject(new Error('timeout')), ms);
+    }),
+  ]);
+}
+
 // `buttons`/`requireInteraction` son de Chrome; los tipos del polyfill (subconjunto
 // cross-browser) no los incluyen, así que tipamos aparte y casteamos al crear.
 type NotifOptions = Notifications.CreateNotificationOptions & {
@@ -155,11 +165,12 @@ async function handleEndOfDay(): Promise<void> {
   const user = await storage.getUser();
 
   // worked = null cuando no se pudo verificar (sin sesión válida o error de red).
+  // El summary lleva timeout: la red no debe impedir que el aviso salga.
   let worked: number | null = null;
   if (user && (await storage.isSessionValid())) {
     try {
       const { start, end } = dayRangeUtc(todayLocalDate());
-      const summary = await getSummary(user.userId, start, end);
+      const summary = await withTimeout(getSummary(user.userId, start, end), 5000);
       worked = summary.totalHours ?? 0;
     } catch {
       worked = null;
@@ -205,7 +216,9 @@ function scheduleTimerCheck(): void {
 async function handleTimerCheck(): Promise<void> {
   const timer = await storage.getActiveTimer();
   if (!timer) return;
-  notify(NOTIF_TIMER, {
+  // El SW de MV3 se termina al quedar inactivo; await-eamos para que no muera
+  // antes de que la notificación se cree (si no, "a ratos no sale").
+  await notify(NOTIF_TIMER, {
     type: 'basic',
     iconUrl: icon(),
     title: t('timerStillTitle'),
@@ -223,7 +236,7 @@ async function toggleTimer(): Promise<void> {
     const initial = await stopActivity();
     if (initial) {
       await storage.setPendingRegistration(initial);
-      notify(NOTIF_TIMER_DONE, {
+      await notify(NOTIF_TIMER_DONE, {
         type: 'basic',
         iconUrl: icon(),
         title: t('timerDoneTitle'),
@@ -238,7 +251,7 @@ async function toggleTimer(): Promise<void> {
     openPopup();
   } else {
     await startActivity();
-    notify(`${NOTIF_TIMER}-started`, {
+    await notify(`${NOTIF_TIMER}-started`, {
       type: 'basic',
       iconUrl: icon(),
       title: t('timerStartedTitle'),
@@ -290,6 +303,8 @@ browser.commands.onCommand.addListener((command) => {
 // Permite probar el aviso de cierre de día al instante desde Ajustes.
 browser.runtime.onMessage.addListener((message: unknown) => {
   if ((message as { type?: string } | null)?.type === 'trinity-test-eod') {
+    // eslint-disable-next-line no-console
+    console.log('[Trinity] test-eod recibido → generando aviso');
     // Devolver la promesa mantiene vivo el SW hasta crear la notificación.
     return handleEndOfDay();
   }
