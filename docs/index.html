@@ -16,93 +16,259 @@
         --line: #e2e8f0;
         --bg: #f8fafc;
       }
-      * { box-sizing: border-box; }
+      * {
+        box-sizing: border-box;
+      }
       body {
         margin: 0;
-        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-        color: var(--ink);
-        background: radial-gradient(1200px 600px at 50% -10%, #eef2ff 0%, var(--bg) 55%);
+        background: radial-gradient(
+          1200px 600px at 50% -10%,
+          #eef2ff 0%,
+          var(--bg) 55%
+        );
         min-height: 100vh;
+        color: var(--ink);
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          'Segoe UI',
+          Roboto,
+          sans-serif;
       }
-      .wrap { max-width: 760px; margin: 0 auto; padding: 48px 20px 64px; }
-      header { text-align: center; margin-bottom: 36px; }
+      .wrap {
+        margin: 0 auto;
+        padding: 48px 20px 64px;
+        max-width: 760px;
+      }
+      header {
+        margin-bottom: 36px;
+        text-align: center;
+      }
       .logo {
-        width: 64px; height: 64px; border-radius: 18px; background: var(--brand);
-        display: inline-flex; align-items: center; justify-content: center;
-        box-shadow: 0 12px 30px -10px rgba(79, 70, 229, 0.55); margin-bottom: 14px;
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 14px;
+        box-shadow: 0 12px 30px -10px rgba(79, 70, 229, 0.55);
+        border-radius: 18px;
+        background: var(--brand);
+        width: 64px;
+        height: 64px;
       }
-      .logo svg { color: #fff; }
-      h1 { font-size: 30px; font-weight: 800; letter-spacing: -0.02em; margin: 0; }
-      .sub { color: var(--muted); margin: 6px 0 0; font-size: 15px; }
+      .logo svg {
+        color: #fff;
+      }
+      h1 {
+        margin: 0;
+        font-weight: 800;
+        font-size: 30px;
+        letter-spacing: -0.02em;
+      }
+      .sub {
+        margin: 6px 0 0;
+        color: var(--muted);
+        font-size: 15px;
+      }
       .release {
-        display: inline-flex; gap: 8px; align-items: center; margin-top: 14px;
-        font-size: 13px; color: var(--muted);
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 14px;
+        color: var(--muted);
+        font-size: 13px;
       }
       .badge {
-        background: #eef2ff; color: #4338ca; font-weight: 700; border-radius: 999px;
-        padding: 3px 10px; font-size: 12px;
+        border-radius: 999px;
+        background: #eef2ff;
+        padding: 3px 10px;
+        color: #4338ca;
+        font-weight: 700;
+        font-size: 12px;
       }
-      .cards { display: grid; gap: 16px; grid-template-columns: 1fr 1fr; }
-      @media (max-width: 560px) { .cards { grid-template-columns: 1fr; } }
+      .cards {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+      @media (max-width: 560px) {
+        .cards {
+          grid-template-columns: 1fr;
+        }
+      }
       .card {
-        background: #fff; border: 1px solid var(--line); border-radius: 18px; padding: 22px;
-        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04); display: flex; flex-direction: column;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        background: #fff;
+        padding: 22px;
       }
-      .card h2 { margin: 0 0 4px; font-size: 18px; font-weight: 800; }
-      .card .note { color: var(--muted); font-size: 13px; margin: 0 0 16px; line-height: 1.5; }
+      .card h2 {
+        margin: 0 0 4px;
+        font-weight: 800;
+        font-size: 18px;
+      }
+      .card .note {
+        margin: 0 0 16px;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.5;
+      }
       .btn {
-        margin-top: auto; display: inline-flex; align-items: center; justify-content: center;
-        gap: 8px; border: 0; border-radius: 12px; padding: 12px 16px; font-size: 14px;
-        font-weight: 700; color: #fff; background: var(--brand); text-decoration: none;
-        cursor: pointer; transition: opacity 0.15s ease;
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        transition: opacity 0.15s ease;
+        cursor: pointer;
+        margin-top: auto;
+        border: 0;
+        border-radius: 12px;
+        background: var(--brand);
+        padding: 12px 16px;
+        color: #fff;
+        font-weight: 700;
+        font-size: 14px;
+        text-decoration: none;
       }
-      .btn:hover { opacity: 0.93; }
-      .btn[aria-disabled="true"] { opacity: 0.5; pointer-events: none; }
-      .steps { list-style: none; padding: 0; margin: 0 0 16px; }
+      .btn:hover {
+        opacity: 0.93;
+      }
+      .btn[aria-disabled='true'] {
+        opacity: 0.5;
+        pointer-events: none;
+      }
+      .steps {
+        margin: 0 0 16px;
+        padding: 0;
+        list-style: none;
+      }
       .steps li {
-        position: relative; padding-left: 22px; font-size: 13px; color: #475569;
-        margin-bottom: 6px; line-height: 1.45;
+        position: relative;
+        margin-bottom: 6px;
+        padding-left: 22px;
+        color: #475569;
+        font-size: 13px;
+        line-height: 1.45;
       }
       .steps li::before {
-        content: ""; position: absolute; left: 0; top: 7px; width: 7px; height: 7px;
-        border-radius: 999px; background: #c7d2fe;
+        position: absolute;
+        top: 7px;
+        left: 0;
+        border-radius: 999px;
+        background: #c7d2fe;
+        width: 7px;
+        height: 7px;
+        content: '';
       }
-      .section { margin-top: 44px; }
+      .section {
+        margin-top: 44px;
+      }
       .section h3 {
-        font-size: 13px; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase;
-        color: #94a3b8; margin: 0 0 16px; text-align: center;
+        margin: 0 0 16px;
+        color: #94a3b8;
+        font-weight: 800;
+        font-size: 13px;
+        letter-spacing: 0.04em;
+        text-align: center;
+        text-transform: uppercase;
       }
-      .features { display: grid; gap: 12px; grid-template-columns: 1fr 1fr; }
-      @media (max-width: 560px) { .features { grid-template-columns: 1fr; } }
+      .features {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+      @media (max-width: 560px) {
+        .features {
+          grid-template-columns: 1fr;
+        }
+      }
       .feature {
-        display: flex; gap: 12px; align-items: flex-start; background: #fff;
-        border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px;
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: #fff;
+        padding: 14px 16px;
       }
       .feature .ic {
-        flex: 0 0 auto; width: 34px; height: 34px; border-radius: 10px; background: #eef2ff;
-        display: flex; align-items: center; justify-content: center; font-size: 17px;
+        display: flex;
+        flex: 0 0 auto;
+        justify-content: center;
+        align-items: center;
+        border-radius: 10px;
+        background: #eef2ff;
+        width: 34px;
+        height: 34px;
+        font-size: 17px;
       }
-      .feature b { display: block; font-size: 14px; margin-bottom: 2px; }
-      .feature span { font-size: 12.5px; color: var(--muted); line-height: 1.45; }
+      .feature b {
+        display: block;
+        margin-bottom: 2px;
+        font-size: 14px;
+      }
+      .feature span {
+        color: var(--muted);
+        font-size: 12.5px;
+        line-height: 1.45;
+      }
       .roadmap {
-        list-style: none; padding: 18px 20px; margin: 0; background: #fff;
-        border: 1px dashed #cbd5e1; border-radius: 16px;
+        margin: 0;
+        border: 1px dashed #cbd5e1;
+        border-radius: 16px;
+        background: #fff;
+        padding: 18px 20px;
+        list-style: none;
       }
       .roadmap li {
-        position: relative; padding-left: 26px; font-size: 13.5px; color: #475569;
-        line-height: 1.5; margin-bottom: 10px;
+        position: relative;
+        margin-bottom: 10px;
+        padding-left: 26px;
+        color: #475569;
+        font-size: 13.5px;
+        line-height: 1.5;
       }
-      .roadmap li:last-child { margin-bottom: 0; }
+      .roadmap li:last-child {
+        margin-bottom: 0;
+      }
       .roadmap li::before {
-        content: "○"; position: absolute; left: 4px; top: -1px; color: #a5b4fc;
-        font-size: 15px; font-weight: 700;
+        position: absolute;
+        top: -1px;
+        left: 4px;
+        content: '○';
+        color: #a5b4fc;
+        font-weight: 700;
+        font-size: 15px;
       }
-      .foot { text-align: center; margin-top: 36px; color: var(--muted); font-size: 13px; }
-      .foot a { color: #6366f1; font-weight: 600; text-decoration: none; }
-      .codevs { font-weight: 800; background: var(--brand); -webkit-background-clip: text; background-clip: text; color: transparent; }
+      .foot {
+        margin-top: 36px;
+        color: var(--muted);
+        font-size: 13px;
+        text-align: center;
+      }
+      .foot a {
+        color: #6366f1;
+        font-weight: 600;
+        text-decoration: none;
+      }
+      .codevs {
+        background: var(--brand);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        font-weight: 800;
+      }
       .error {
-        background: #fff1f2; border: 1px solid #fecdd3; color: #be123c; border-radius: 12px;
-        padding: 14px 16px; font-size: 14px; text-align: center;
+        border: 1px solid #fecdd3;
+        border-radius: 12px;
+        background: #fff1f2;
+        padding: 14px 16px;
+        color: #be123c;
+        font-size: 14px;
+        text-align: center;
       }
     </style>
   </head>
@@ -110,8 +276,16 @@
     <div class="wrap">
       <header>
         <span class="logo" aria-hidden="true">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-            stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+          <svg
+            width="32"
+            height="32"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.4"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
             <circle cx="12" cy="12" r="9"></circle>
             <path d="M12 7v5l3 2"></path>
           </svg>
@@ -133,25 +307,40 @@
           <ul class="steps">
             <li>Descarga y descomprime el ZIP.</li>
             <li>Abre <strong>chrome://extensions</strong>.</li>
-            <li>Activa el <strong>Modo de desarrollador</strong> (arriba a la derecha).</li>
-            <li>Pulsa <strong>«Cargar descomprimida»</strong> y elige la carpeta.</li>
+            <li>
+              Activa el <strong>Modo de desarrollador</strong> (arriba a la
+              derecha).
+            </li>
+            <li>
+              Pulsa <strong>«Cargar descomprimida»</strong> y elige la carpeta.
+            </li>
           </ul>
-          <a class="btn" id="dl-chrome" href="#" aria-disabled="true">Descargar para Chrome</a>
+          <a class="btn" id="dl-chrome" href="#" aria-disabled="true"
+            >Descargar para Chrome</a
+          >
         </section>
 
         <section class="card">
           <h2>Firefox</h2>
           <p class="note">
-            El ZIP se carga como complemento temporal; la instalación permanente requiere un
+            El ZIP se carga como complemento temporal; la instalación permanente
+            requiere un
             <em>.xpi</em> firmado.
           </p>
           <ul class="steps">
             <li>Descarga el ZIP.</li>
-            <li>Abre <strong>about:debugging#/runtime/this-firefox</strong>.</li>
+            <li>
+              Abre <strong>about:debugging#/runtime/this-firefox</strong>.
+            </li>
             <li>Pulsa <strong>«Cargar complemento temporal»</strong>.</li>
-            <li>Selecciona el <strong>manifest.json</strong> dentro del ZIP descomprimido.</li>
+            <li>
+              Selecciona el <strong>manifest.json</strong> dentro del ZIP
+              descomprimido.
+            </li>
           </ul>
-          <a class="btn" id="dl-firefox" href="#" aria-disabled="true">Descargar para Firefox</a>
+          <a class="btn" id="dl-firefox" href="#" aria-disabled="true"
+            >Descargar para Firefox</a
+          >
         </section>
       </div>
 
@@ -162,7 +351,9 @@
             <span class="ic">⏱️</span>
             <div>
               <b>Registro en segundos</b>
-              <span>Formulario propio rápido, sin entrar a la web de Tutator.</span>
+              <span
+                >Formulario propio rápido, sin entrar a la web de Tutator.</span
+              >
             </div>
           </div>
           <div class="feature">
@@ -176,7 +367,10 @@
             <span class="ic">🟢</span>
             <div>
               <b>Cronómetro de actividad</b>
-              <span>Inicia una reunión; al terminar se convierte en un registro.</span>
+              <span
+                >Inicia una reunión; al terminar se convierte en un
+                registro.</span
+              >
             </div>
           </div>
           <div class="feature">
@@ -211,21 +405,29 @@
             <span class="ic">🌐</span>
             <div>
               <b>Multi-idioma</b>
-              <span>Español, inglés y francés según el idioma de tu navegador.</span>
+              <span
+                >Español, inglés y francés según el idioma de tu
+                navegador.</span
+              >
             </div>
           </div>
           <div class="feature">
             <span class="ic">🔐</span>
             <div>
               <b>Sesión segura</b>
-              <span>Re-login automático al caducar, con credenciales cifradas.</span>
+              <span
+                >Re-login automático al caducar, con credenciales
+                cifradas.</span
+              >
             </div>
           </div>
           <div class="feature">
             <span class="ic">🧩</span>
             <div>
               <b>Multi-navegador</b>
-              <span>Funciona en Chrome, Edge, Brave y Firefox (Manifest V3).</span>
+              <span
+                >Funciona en Chrome, Edge, Brave y Firefox (Manifest V3).</span
+              >
             </div>
           </div>
         </div>
@@ -234,8 +436,14 @@
       <section class="section">
         <h3>En camino</h3>
         <ul class="roadmap">
-          <li>Publicación en la Chrome Web Store y <em>.xpi</em> firmado para Firefox (instalación de un clic).</li>
-          <li>Sincronizar las plantillas con el backend (hoy se guardan solo en este equipo).</li>
+          <li>
+            Publicación en la Chrome Web Store y <em>.xpi</em> firmado para
+            Firefox (instalación de un clic).
+          </li>
+          <li>
+            Sincronizar las plantillas con el backend (hoy se guardan solo en
+            este equipo).
+          </li>
           <li>Aviso antes de que la sesión expire.</li>
           <li>Mejoras de rendimiento y pulido de la interfaz.</li>
         </ul>
@@ -243,9 +451,18 @@
 
       <p class="foot">
         ¿Problemas? Ve a la
-        <a id="releases-link" href="#" target="_blank" rel="noopener">página de Releases</a>.
+        <a id="releases-link" href="#" target="_blank" rel="noopener"
+          >página de Releases</a
+        >.
         <br />
-        by <a class="codevs" href="https://codevs.tech/" target="_blank" rel="noopener">Codevs</a>
+        by
+        <a
+          class="codevs"
+          href="https://codevs.tech/"
+          target="_blank"
+          rel="noopener"
+          >Codevs</a
+        >
       </p>
     </div>
 
@@ -253,14 +470,17 @@
       // Repositorio en GitHub (owner/repo). Ajusta si renombras el repo.
       var OWNER = 'tutator-codevs';
       var REPO = 'trinity_extesion_chrome';
-      var RELEASES_URL = 'https://github.com/' + OWNER + '/' + REPO + '/releases';
+      var RELEASES_URL =
+        'https://github.com/' + OWNER + '/' + REPO + '/releases';
 
       document.getElementById('releases-link').href = RELEASES_URL;
 
       function fmtDate(iso) {
         try {
           return new Intl.DateTimeFormat('es', {
-            day: 'numeric', month: 'long', year: 'numeric',
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric',
           }).format(new Date(iso));
         } catch (e) {
           return '';
@@ -275,16 +495,24 @@
         }
       }
 
-      fetch('https://api.github.com/repos/' + OWNER + '/' + REPO + '/releases/latest', {
-        headers: { Accept: 'application/vnd.github+json' },
-      })
+      fetch(
+        'https://api.github.com/repos/' +
+          OWNER +
+          '/' +
+          REPO +
+          '/releases/latest',
+        {
+          headers: { Accept: 'application/vnd.github+json' },
+        }
+      )
         .then(function (r) {
           if (!r.ok) throw new Error('No hay Releases publicados todavía.');
           return r.json();
         })
         .then(function (rel) {
           var info = document.getElementById('release-info');
-          document.getElementById('release-tag').textContent = rel.tag_name || 'última';
+          document.getElementById('release-tag').textContent =
+            rel.tag_name || 'última';
           document.getElementById('release-date').textContent = rel.published_at
             ? 'Publicada el ' + fmtDate(rel.published_at)
             : '';
@@ -308,8 +536,12 @@
         .catch(function (err) {
           document.getElementById('status').innerHTML =
             '<div class="error">' +
-            (err && err.message ? err.message : 'No se pudo cargar la última versión.') +
-            ' Abre la <a href="' + RELEASES_URL + '">página de Releases</a>.</div>';
+            (err && err.message
+              ? err.message
+              : 'No se pudo cargar la última versión.') +
+            ' Abre la <a href="' +
+            RELEASES_URL +
+            '">página de Releases</a>.</div>';
         });
     </script>
   </body>
