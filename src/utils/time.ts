@@ -42,6 +42,50 @@ export function formatLocalDateLabel(date: string): string {
   }).format(dt);
 }
 
+/** Normaliza un token de mes: minúsculas, sin acentos ni puntuación ("Jun." -> "jun"). */
+function normalizeMonthToken(token: string): string {
+  return token
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z]/g, '');
+}
+
+/** Índice abreviatura-de-mes -> 0..11, cubriendo es/en/fr y el locale del navegador.
+ *  Permite parsear labels del backend como "8/Jun/2026" sin depender del idioma. */
+const MONTH_INDEX: Record<string, number> = (() => {
+  const map: Record<string, number> = {};
+  const locales = ['es', 'en', 'fr', navigator.language || 'es'];
+  const months = Array.from({ length: 12 }, (_, m) => m);
+  locales.forEach((loc) => {
+    const fmt = new Intl.DateTimeFormat(loc, { month: 'short' });
+    months.forEach((m) => {
+      const key = normalizeMonthToken(fmt.format(new Date(2026, m, 1)));
+      if (key) map[key] = m;
+    });
+  });
+  return map;
+})();
+
+/** Clave ordenable (year*10000 + month*100 + day) de un label "D/Mon/YYYY" del
+ *  backend (hoursByDay). Devuelve 0 si no se puede parsear. */
+export function dayLabelSortKey(label: string): number {
+  const parts = label.split('/');
+  if (parts.length !== 3) return 0;
+  const day = Number(parts[0]);
+  const month = MONTH_INDEX[normalizeMonthToken(parts[1])];
+  const year = Number(parts[2]);
+  if (!day || month === undefined || !year) return 0;
+  return year * 10000 + month * 100 + day;
+}
+
+/** Misma clave ordenable que dayLabelSortKey, pero desde 'YYYY-MM-DD' local. */
+export function localDateSortKey(date: string): number {
+  const [y, m, d] = date.split('-').map(Number);
+  if (!y || !m || !d) return 0;
+  return y * 10000 + (m - 1) * 100 + d;
+}
+
 /** ('YYYY-MM-DD' local, 'HH:mm' local) -> instante ISO en UTC. */
 export function localToUtcIso(date: string, time: string): string {
   const [y, m, d] = date.split('-').map(Number);

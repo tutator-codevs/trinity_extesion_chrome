@@ -26,6 +26,8 @@ import {
   currentMonthToDateRangeUtc,
   currentMonthStartLocalDate,
   currentWeekStartLocalDate,
+  dayLabelSortKey,
+  localDateSortKey,
   formatLocalDateLabel,
   todayLocalDate,
   utcIsoToLocalTime,
@@ -607,7 +609,12 @@ export default function Dashboard({
     return () => clearInterval(id);
   }, [timer]);
 
-  const days = summary?.hoursByDay ?? [];
+  // El backend devuelve hoursByDay del mes en curso, ordenado por el texto del label
+  // ("1","10","2"...). Lo acotamos a la semana actual y lo ordenamos de hoy hacia atrás.
+  const weekStartKey = localDateSortKey(currentWeekStartLocalDate());
+  const days = [...(summary?.hoursByDay ?? [])]
+    .filter((d) => dayLabelSortKey(d.label) >= weekStartKey)
+    .sort((a, b) => dayLabelSortKey(b.label) - dayLabelSortKey(a.label));
   const maxDay = Math.max(1, ...days.map((d) => d.value));
   const allTimecards = summary?.timecards ?? [];
   const periodStartByPeriod: Record<RecordPeriod, string> = {
@@ -616,7 +623,10 @@ export default function Dashboard({
     month: currentMonthStartLocalDate(),
   };
   // tc.date es 'YYYY-MM-DD' local; comparación lexicográfica = comparación de fecha.
-  const timecards = allTimecards.filter((tc) => tc.date >= periodStartByPeriod[recordPeriod]);
+  // Orden descendente por instante de inicio: lo más reciente arriba, lo más antiguo al final.
+  const timecards = allTimecards
+    .filter((tc) => tc.date >= periodStartByPeriod[recordPeriod])
+    .sort((a, b) => b.start.localeCompare(a.start));
   const periodHours = timecards.reduce((sum, tc) => sum + (Number(tc.hours) || 0), 0);
 
   let body: JSX.Element;
