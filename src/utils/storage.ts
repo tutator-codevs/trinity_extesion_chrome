@@ -1,5 +1,6 @@
 import browser from 'webextension-polyfill';
 
+import { DEFAULT_PALETTE_ID, DEFAULT_CUSTOM_COLORS } from '../lib/palettes';
 import { decryptString, encryptString, type EncryptedBlob } from './vault';
 import type {
   ActiveTimer,
@@ -31,12 +32,17 @@ export interface StoredCredentials {
 // El token del backend dura ~4h. Si el login no informa expiración, asumimos este TTL.
 const DEFAULT_TOKEN_TTL_MS = 4 * 60 * 60 * 1000;
 
+/** Máximo de plantillas guardadas. Mantiene el popup manejable y el storage pequeño. */
+export const MAX_TEMPLATES = 10;
+
 export const DEFAULT_SETTINGS: Settings = {
   endOfDayEnabled: true,
   endOfDayTime: '18:00',
   targetHours: 8,
   aiProvider: 'none',
   aiApiKey: '',
+  paletteId: DEFAULT_PALETTE_ID,
+  customColors: [...DEFAULT_CUSTOM_COLORS],
 };
 
 export const storage = {

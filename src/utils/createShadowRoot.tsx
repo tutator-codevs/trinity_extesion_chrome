@@ -1,5 +1,7 @@
 import { createRoot } from 'react-dom/client';
 
+import { setThemeTarget } from '../lib/palettes';
+
 /**
  * Creates a shadow root with the specified styles and returns a React root in it.
  * @param {string} styles - CSS styles to be applied to the shadow root.
@@ -12,6 +14,11 @@ export default function createShadowRoot(styles: string) {
   // Create an internal mount node to avoid Xray wrapper issues in Firefox
   const mount = document.createElement('div');
   shadow.appendChild(mount);
+
+  // Las variables de tema (--brand-gradient, --color-indigo-*) se aplican aquí: un
+  // inline style en este nodo (dentro del shadow) gana a la declaración `:host` de
+  // Tailwind, así el acento retiñe toda la UI del popup.
+  setThemeTarget(mount);
 
   // Apply styles: prefer constructable stylesheets, fallback safely
   try {

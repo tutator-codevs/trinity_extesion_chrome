@@ -29,7 +29,7 @@ import {
   getCatalogs,
   insertTimecard,
 } from '../utils/trinity';
-import { storage } from '../utils/storage';
+import { storage, MAX_TEMPLATES } from '../utils/storage';
 import { parseLocal, resolveFields, type VoiceContext } from '../utils/voiceParse';
 import { parseWithAI } from '../utils/voiceAi';
 import VoicePanel, { type VoiceLang } from './VoicePanel';
@@ -88,6 +88,7 @@ const dict: Dict = {
     save: 'Guardar',
     cancel: 'Cancelar',
     saveAsTemplate: 'Guardar como plantilla',
+    templateLimitReached: 'Máximo {max} plantillas. Elimina alguna para guardar otra.',
     saveHours: 'Guardar horas',
     saving: 'Guardando…',
     preparingForm: 'Preparando el formulario…',
@@ -131,6 +132,7 @@ const dict: Dict = {
     save: 'Save',
     cancel: 'Cancel',
     saveAsTemplate: 'Save as template',
+    templateLimitReached: 'Maximum {max} templates. Delete one to save another.',
     saveHours: 'Save hours',
     saving: 'Saving…',
     preparingForm: 'Preparing the form…',
@@ -174,6 +176,7 @@ const dict: Dict = {
     save: 'Enregistrer',
     cancel: 'Annuler',
     saveAsTemplate: 'Enregistrer comme modèle',
+    templateLimitReached: 'Maximum {max} modèles. Supprimez-en un pour en enregistrer un autre.',
     saveHours: 'Enregistrer les heures',
     saving: 'Enregistrement…',
     preparingForm: 'Préparation du formulaire…',
@@ -739,6 +742,8 @@ export default function RegisterForm({
     setTaskCode(tpl.typeTaskCt);
     setProjectId(tpl.projectId ?? '');
     setDescription(tpl.description);
+    if (tpl.startTime) setStartTime(tpl.startTime);
+    if (tpl.endTime) setEndTime(tpl.endTime);
     setError(null);
   };
 
@@ -749,6 +754,11 @@ export default function RegisterForm({
 
   const saveAsTemplate = async () => {
     if (!tplName.trim() || !workTypeCode || !taskCode) return;
+    if (templates.length >= MAX_TEMPLATES) {
+      setError(t('templateLimitReached', { max: MAX_TEMPLATES }));
+      setShowSaveTpl(false);
+      return;
+    }
     const template: WorkTemplate = {
       id: crypto.randomUUID(),
       name: tplName.trim(),
@@ -761,6 +771,8 @@ export default function RegisterForm({
         ? null
         : projects.find((p) => p.id === projectId)?.name ?? null,
       description: description.trim(),
+      startTime,
+      endTime,
     };
     await storage.saveTemplate(template);
     setTplName('');
@@ -1068,7 +1080,7 @@ export default function RegisterForm({
       </div>
 
       {/* Guardar como plantilla */}
-      {showSaveTpl ? (
+      {showSaveTpl && (
         <div className="flex items-center gap-2 rounded-xl border border-indigo-100 bg-indigo-50/60 p-2">
           <input
             type="text"
@@ -1092,7 +1104,15 @@ export default function RegisterForm({
             {t('cancel')}
           </button>
         </div>
-      ) : (
+      )}
+
+      {!showSaveTpl && templates.length >= MAX_TEMPLATES && (
+        <p className="rounded-xl border border-dashed border-slate-200 px-3 py-2 text-center text-[11px] font-medium text-slate-400">
+          {t('templateLimitReached', { max: MAX_TEMPLATES })}
+        </p>
+      )}
+
+      {!showSaveTpl && templates.length < MAX_TEMPLATES && (
         <button
           type="button"
           onClick={() => setShowSaveTpl(true)}

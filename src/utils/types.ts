@@ -105,6 +105,10 @@ export interface Settings {
   aiProvider: AiProvider;
   /** API key del proveedor. Se guarda solo en este equipo; nunca viaja en el bundle. */
   aiApiKey: string;
+  /** Id de la paleta de color elegida (ver `src/lib/palettes.ts`). */
+  paletteId: string;
+  /** Colores de la paleta personalizada (3 hex), usados cuando `paletteId` = 'custom'. */
+  customColors: string[];
 }
 
 /** Cronómetro de actividad en curso. */
@@ -127,4 +131,8 @@ export interface WorkTemplate {
   projectId: string | null;
   projectName: string | null;
   description: string;
+  /** Hora local de inicio 'HH:mm' (opcional; plantillas antiguas no la tienen). */
+  startTime?: string;
+  /** Hora local de fin 'HH:mm' (opcional; plantillas antiguas no la tienen). */
+  endTime?: string;
 }

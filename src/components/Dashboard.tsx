@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type JSX } from 'react';
+import { useCallback, useEffect, useState, type JSX, type ReactNode } from 'react';
 import browser from 'webextension-polyfill';
 import {
   Clock,
@@ -18,6 +18,12 @@ import {
   Save,
   Bell,
   Mic,
+  LayoutTemplate,
+  Trash2,
+  Briefcase,
+  Palette,
+  Check,
+  ChevronDown,
 } from 'lucide-react';
 
 import { AuthError } from '../utils/api';
@@ -42,8 +48,17 @@ import type {
   Summary,
   Timecard,
   User,
+  WorkTemplate,
 } from '../utils/types';
 import { BRAND_GRADIENT } from '../lib/brand';
+import {
+  PALETTES,
+  CUSTOM_PALETTE_ID,
+  buildGradient,
+  resolveGradient,
+  resolveAccent,
+  applyTheme,
+} from '../lib/palettes';
 import { makeT, type Dict } from '../i18n/locale';
 import RegisterForm from './RegisterForm';
 import CodevsCredit from './CodevsCredit';
@@ -61,6 +76,7 @@ const dict: Dict = {
     back: 'Volver',
     settings: 'Ajustes',
     endOfDayReminder: 'Aviso de cierre de día',
+    enabled: 'Activado',
     reminderTime: 'Hora del aviso',
     targetHoursPerDay: 'Horas objetivo / día',
     reminderHint: 'Te avisaremos a esa hora para cerrar el día e indicar si te faltan horas.',
@@ -73,6 +89,17 @@ const dict: Dict = {
     saved: 'Guardado ✓',
     saveSettings: 'Guardar ajustes',
     testReminderNow: 'Probar aviso ahora',
+    savedTemplates: 'Plantillas guardadas',
+    templatesHint: 'Aplícalas con un clic desde el formulario de registro.',
+    noTemplates: 'Aún no tienes plantillas. Guarda una desde el formulario de registro.',
+    deleteTemplate: 'Eliminar plantilla {name}',
+    colorPalette: 'Paleta de color',
+    palette_trinity: 'Trinity',
+    palette_ocean: 'Océano',
+    palette_sunset: 'Naranja',
+    palette_ruby: 'Rojo',
+    palette_custom: 'Personalizada',
+    customColorsHint: 'Elige tus 3 colores (inicio, centro y fin del degradado).',
     loadSummaryError: 'No se pudo cargar el resumen.',
     loadingSummary: 'Cargando tu resumen…',
     retry: 'Reintentar',
@@ -108,6 +135,7 @@ const dict: Dict = {
     back: 'Back',
     settings: 'Settings',
     endOfDayReminder: 'End-of-day reminder',
+    enabled: 'Enabled',
     reminderTime: 'Reminder time',
     targetHoursPerDay: 'Target hours / day',
     reminderHint:
@@ -121,6 +149,17 @@ const dict: Dict = {
     saved: 'Saved ✓',
     saveSettings: 'Save settings',
     testReminderNow: 'Test reminder now',
+    savedTemplates: 'Saved templates',
+    templatesHint: 'Apply them with one click from the entry form.',
+    noTemplates: 'You have no templates yet. Save one from the entry form.',
+    deleteTemplate: 'Delete template {name}',
+    colorPalette: 'Color palette',
+    palette_trinity: 'Trinity',
+    palette_ocean: 'Ocean',
+    palette_sunset: 'Orange',
+    palette_ruby: 'Red',
+    palette_custom: 'Custom',
+    customColorsHint: 'Pick your 3 colors (gradient start, middle and end).',
     loadSummaryError: 'Could not load the summary.',
     loadingSummary: 'Loading your summary…',
     retry: 'Retry',
@@ -156,6 +195,7 @@ const dict: Dict = {
     back: 'Retour',
     settings: 'Paramètres',
     endOfDayReminder: 'Rappel de fin de journée',
+    enabled: 'Activé',
     reminderTime: 'Heure du rappel',
     targetHoursPerDay: 'Heures cibles / jour',
     reminderHint:
@@ -169,6 +209,17 @@ const dict: Dict = {
     saved: 'Enregistré ✓',
     saveSettings: 'Enregistrer les paramètres',
     testReminderNow: 'Tester le rappel maintenant',
+    savedTemplates: 'Modèles enregistrés',
+    templatesHint: 'Appliquez-les en un clic depuis le formulaire de saisie.',
+    noTemplates: 'Vous n’avez pas encore de modèle. Enregistrez-en un depuis le formulaire de saisie.',
+    deleteTemplate: 'Supprimer le modèle {name}',
+    colorPalette: 'Palette de couleurs',
+    palette_trinity: 'Trinity',
+    palette_ocean: 'Océan',
+    palette_sunset: 'Orange',
+    palette_ruby: 'Rouge',
+    palette_custom: 'Personnalisée',
+    customColorsHint: 'Choisissez vos 3 couleurs (début, milieu et fin du dégradé).',
     loadSummaryError: 'Impossible de charger le résumé.',
     loadingSummary: 'Chargement de votre résumé…',
     retry: 'Réessayer',
@@ -255,7 +306,9 @@ function TimecardRow({
     <div className="flex items-stretch gap-2.5 rounded-xl border border-slate-100 bg-white p-2.5 shadow-sm">
       <span
         className="w-1 shrink-0 rounded-full"
-        style={{ background: isProject ? '#4f46e5' : '#9333ea' }}
+        style={{
+          background: isProject ? 'var(--color-indigo-600)' : 'var(--color-indigo-400)',
+        }}
       />
       <div className="min-w-0 flex-1">
         <p className="truncate text-[13px] font-semibold text-slate-800">
@@ -273,8 +326,8 @@ function TimecardRow({
           <span
             className="rounded-full px-1.5 py-0.5 text-[10px] font-semibold"
             style={{
-              background: isProject ? '#e0e7ff' : '#f3e8ff',
-              color: isProject ? '#4338ca' : '#7e22ce',
+              background: isProject ? 'var(--color-indigo-100)' : 'var(--color-indigo-50)',
+              color: isProject ? 'var(--color-indigo-700)' : 'var(--color-indigo-500)',
             }}
           >
             {tag}
@@ -346,13 +399,53 @@ function TimerCard({
   );
 }
 
+/** Sección colapsable de Ajustes. Cada bloque es independiente para ahorrar espacio. */
+function AccordionSection({
+  icon,
+  title,
+  defaultOpen = false,
+  children,
+}: {
+  icon: JSX.Element;
+  title: string;
+  defaultOpen?: boolean;
+  children: ReactNode;
+}): JSX.Element {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        className="flex w-full items-center gap-1.5 p-3.5 text-left"
+      >
+        {icon}
+        <span className="flex-1 text-sm font-bold text-slate-700">{title}</span>
+        <ChevronDown
+          size={16}
+          className={`shrink-0 text-slate-400 transition-transform ${open ? 'rotate-180' : ''}`}
+        />
+      </button>
+      {open ? <div className="flex flex-col gap-3 px-3.5 pb-3.5">{children}</div> : null}
+    </div>
+  );
+}
+
 function SettingsPanel({ onBack }: { onBack: () => void }): JSX.Element {
   const [settings, setSettings] = useState<AppSettings | null>(null);
   const [saved, setSaved] = useState(false);
+  const [templates, setTemplates] = useState<WorkTemplate[]>([]);
 
   useEffect(() => {
     storage.getSettings().then(setSettings);
+    storage.getTemplates().then(setTemplates);
   }, []);
+
+  const deleteTemplate = async (id: string) => {
+    await storage.deleteTemplate(id);
+    setTemplates(await storage.getTemplates());
+  };
 
   if (!settings) {
     return (
@@ -363,6 +456,24 @@ function SettingsPanel({ onBack }: { onBack: () => void }): JSX.Element {
   }
 
   const update = (patch: Partial<AppSettings>) => setSettings({ ...settings, ...patch });
+  // La paleta se persiste al instante (tiene preview en vivo), sin esperar a "Guardar".
+  const persist = (patch: Partial<AppSettings>) => {
+    const next = { ...settings, ...patch };
+    setSettings(next);
+    storage.setSettings(next);
+  };
+  // Aplica la paleta al instante (preview) y la guarda.
+  const selectPalette = (id: string) => {
+    persist({ paletteId: id });
+    applyTheme(resolveGradient(id, settings.customColors), resolveAccent(id, settings.customColors));
+  };
+  // Cambia un color de la paleta personalizada; selecciona "custom", previsualiza y guarda.
+  const setCustomColor = (index: number, value: string) => {
+    const colors = settings.customColors.slice();
+    colors[index] = value;
+    persist({ customColors: colors, paletteId: CUSTOM_PALETTE_ID });
+    applyTheme(buildGradient(colors), resolveAccent(CUSTOM_PALETTE_ID, colors));
+  };
   const save = async () => {
     await storage.setSettings(settings);
     setSaved(true);
@@ -387,9 +498,89 @@ function SettingsPanel({ onBack }: { onBack: () => void }): JSX.Element {
         <h2 className="text-sm font-extrabold text-slate-800">{t('settings')}</h2>
       </div>
 
-      <div className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-3.5 shadow-sm">
+      <AccordionSection
+        icon={<Palette size={14} className="text-indigo-600" />}
+        title={t('colorPalette')}
+        defaultOpen
+      >
+        <div className="grid grid-cols-2 gap-2">
+          {PALETTES.map((p) => {
+            const selected = settings.paletteId === p.id;
+            return (
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => selectPalette(p.id)}
+                aria-pressed={selected}
+                className={`flex items-center gap-2 rounded-xl border p-2 text-left transition-colors ${
+                  selected
+                    ? 'border-indigo-400 bg-indigo-50/60'
+                    : 'border-slate-200 hover:border-indigo-200'
+                }`}
+              >
+                <span
+                  className="size-7 shrink-0 rounded-lg shadow-sm"
+                  style={{ background: p.gradient }}
+                />
+                <span className="flex-1 text-xs font-semibold text-slate-700">
+                  {t(`palette_${p.id}`)}
+                </span>
+                {selected ? <Check size={14} className="shrink-0 text-indigo-600" /> : null}
+              </button>
+            );
+          })}
+
+          {(() => {
+            const selected = settings.paletteId === CUSTOM_PALETTE_ID;
+            return (
+              <button
+                type="button"
+                onClick={() => selectPalette(CUSTOM_PALETTE_ID)}
+                aria-pressed={selected}
+                className={`flex items-center gap-2 rounded-xl border p-2 text-left transition-colors ${
+                  selected
+                    ? 'border-indigo-400 bg-indigo-50/60'
+                    : 'border-slate-200 hover:border-indigo-200'
+                }`}
+              >
+                <span
+                  className="size-7 shrink-0 rounded-lg shadow-sm"
+                  style={{ background: buildGradient(settings.customColors) }}
+                />
+                <span className="flex-1 text-xs font-semibold text-slate-700">
+                  {t('palette_custom')}
+                </span>
+                {selected ? <Check size={14} className="shrink-0 text-indigo-600" /> : null}
+              </button>
+            );
+          })()}
+        </div>
+
+        {settings.paletteId === CUSTOM_PALETTE_ID ? (
+          <div className="flex flex-col gap-2 rounded-xl border border-slate-100 bg-slate-50 p-2.5">
+            <div className="flex items-center gap-2">
+              {[0, 1, 2].map((i) => (
+                <input
+                  key={i}
+                  type="color"
+                  value={settings.customColors[i] ?? '#000000'}
+                  onChange={(e) => setCustomColor(i, e.target.value)}
+                  className="h-9 flex-1 cursor-pointer rounded-lg border border-slate-200 bg-white p-0.5"
+                  aria-label={`${t('palette_custom')} ${i + 1}`}
+                />
+              ))}
+            </div>
+            <p className="text-[11px] leading-relaxed text-slate-400">{t('customColorsHint')}</p>
+          </div>
+        ) : null}
+      </AccordionSection>
+
+      <AccordionSection
+        icon={<Bell size={14} className="text-indigo-600" />}
+        title={t('endOfDayReminder')}
+      >
         <label className="flex cursor-pointer items-center justify-between">
-          <span className="text-sm font-semibold text-slate-700">{t('endOfDayReminder')}</span>
+          <span className="text-sm font-semibold text-slate-700">{t('enabled')}</span>
           <input
             type="checkbox"
             checked={settings.endOfDayEnabled}
@@ -426,16 +617,14 @@ function SettingsPanel({ onBack }: { onBack: () => void }): JSX.Element {
             className="w-20 rounded-lg border border-slate-200 px-2.5 py-1.5 text-sm text-slate-800 outline-none focus:border-indigo-400"
           />
         </div>
-      </div>
 
-      <p className="px-1 text-[11px] text-slate-400">{t('reminderHint')}</p>
+        <p className="text-[11px] leading-relaxed text-slate-400">{t('reminderHint')}</p>
+      </AccordionSection>
 
-      <div className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-3.5 shadow-sm">
-        <div className="flex items-center gap-1.5">
-          <Mic size={14} className="text-indigo-600" />
-          <span className="text-sm font-bold text-slate-700">{t('voiceFill')}</span>
-        </div>
-
+      <AccordionSection
+        icon={<Mic size={14} className="text-indigo-600" />}
+        title={t('voiceFill')}
+      >
         <div className="flex items-center justify-between">
           <label htmlFor="set-ai" className="text-sm font-semibold text-slate-700">
             {t('aiProvider')}
@@ -471,7 +660,60 @@ function SettingsPanel({ onBack }: { onBack: () => void }): JSX.Element {
             <p className="text-[10px] text-slate-400">{t('apiKeyHint')}</p>
           </div>
         ) : null}
-      </div>
+      </AccordionSection>
+
+      <AccordionSection
+        icon={<LayoutTemplate size={14} className="text-indigo-600" />}
+        title={t('savedTemplates')}
+      >
+        {templates.length === 0 ? (
+          <p className="text-xs leading-relaxed text-slate-400">{t('noTemplates')}</p>
+        ) : (
+          <>
+            <ul className="flex max-h-[284px] flex-col gap-2 overflow-y-auto pr-1">
+              {templates.map((tpl) => (
+                <li
+                  key={tpl.id}
+                  className="flex items-start gap-2 rounded-xl border border-slate-100 bg-slate-50 p-2.5"
+                >
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-bold text-slate-800">{tpl.name}</p>
+                    <div className="mt-0.5 flex flex-wrap items-center gap-x-2.5 gap-y-0.5 text-[11px] font-medium text-slate-500">
+                      <span className="inline-flex items-center gap-1">
+                        <Briefcase size={11} className="shrink-0 text-slate-400" />
+                        {tpl.projectName ?? tpl.workTypeLabel}
+                      </span>
+                      <span className="inline-flex items-center gap-1">
+                        <ClipboardList size={11} className="shrink-0 text-slate-400" />
+                        {tpl.taskLabel}
+                      </span>
+                      {tpl.startTime && tpl.endTime ? (
+                        <span className="inline-flex items-center gap-1">
+                          <Clock size={11} className="shrink-0 text-slate-400" />
+                          {tpl.startTime}–{tpl.endTime}
+                        </span>
+                      ) : null}
+                    </div>
+                    {tpl.description ? (
+                      <p className="mt-0.5 truncate text-[11px] text-slate-400">{tpl.description}</p>
+                    ) : null}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => deleteTemplate(tpl.id)}
+                    className="flex size-7 shrink-0 items-center justify-center rounded-lg text-slate-300 transition-colors hover:bg-rose-100 hover:text-rose-600"
+                    aria-label={t('deleteTemplate', { name: tpl.name })}
+                    title={t('deleteTemplate', { name: tpl.name })}
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </li>
+              ))}
+            </ul>
+            <p className="text-[11px] leading-relaxed text-slate-400">{t('templatesHint')}</p>
+          </>
+        )}
+      </AccordionSection>
 
       <button
         type="button"
@@ -667,7 +909,7 @@ export default function Dashboard({
             icon={<CalendarRange size={16} />}
             label={t('avgPerDay')}
             value={`${summary?.averageHours ?? 0}h`}
-            accent="linear-gradient(135deg, #9333ea 0%, #db2777 100%)"
+            accent="linear-gradient(135deg, var(--color-indigo-500) 0%, var(--color-indigo-700) 100%)"
           />
         </div>
 
