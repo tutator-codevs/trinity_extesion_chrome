@@ -215,34 +215,6 @@
         font-size: 12.5px;
         line-height: 1.45;
       }
-      .roadmap {
-        margin: 0;
-        border: 1px dashed #cbd5e1;
-        border-radius: 16px;
-        background: #fff;
-        padding: 18px 20px;
-        list-style: none;
-      }
-      .roadmap li {
-        position: relative;
-        margin-bottom: 10px;
-        padding-left: 26px;
-        color: #475569;
-        font-size: 13.5px;
-        line-height: 1.5;
-      }
-      .roadmap li:last-child {
-        margin-bottom: 0;
-      }
-      .roadmap li::before {
-        position: absolute;
-        top: -1px;
-        left: 4px;
-        content: '○';
-        color: #a5b4fc;
-        font-weight: 700;
-        font-size: 15px;
-      }
       .foot {
         margin-top: 36px;
         color: var(--muted);
@@ -360,7 +332,20 @@
             <span class="ic">🔁</span>
             <div>
               <b>Plantillas reutilizables</b>
-              <span>Guarda tareas recurrentes y aplícalas con un clic.</span>
+              <span
+                >Guarda tareas recurrentes —con sus horas— y aplícalas con un
+                clic. Gestiónalas desde Ajustes.</span
+              >
+            </div>
+          </div>
+          <div class="feature">
+            <span class="ic">🎨</span>
+            <div>
+              <b>Paletas de color</b>
+              <span
+                >Elige tu tema (Trinity, Océano, Naranja, Rojo) o crea uno
+                personalizado.</span
+              >
             </div>
           </div>
           <div class="feature">
@@ -433,26 +418,15 @@
         </div>
       </section>
 
-      <section class="section">
-        <h3>En camino</h3>
-        <ul class="roadmap">
-          <li>
-            Publicación en la Chrome Web Store y <em>.xpi</em> firmado para
-            Firefox (instalación de un clic).
-          </li>
-          <li>
-            Sincronizar las plantillas con el backend (hoy se guardan solo en
-            este equipo).
-          </li>
-          <li>Aviso antes de que la sesión expire.</li>
-          <li>Mejoras de rendimiento y pulido de la interfaz.</li>
-        </ul>
-      </section>
-
       <p class="foot">
         ¿Problemas? Ve a la
         <a id="releases-link" href="#" target="_blank" rel="noopener"
           >página de Releases</a
+        >.
+        <br />
+        ¿Un fallo o una idea? Puedes
+        <a id="issues-link" href="#" target="_blank" rel="noopener"
+          >reportar un problema o pedir una mejora</a
         >.
         <br />
         by
@@ -472,8 +446,11 @@
       var REPO = 'trinity_extesion_chrome';
       var RELEASES_URL =
         'https://github.com/' + OWNER + '/' + REPO + '/releases';
+      var ISSUES_URL =
+        'https://github.com/' + OWNER + '/' + REPO + '/issues/new';
 
       document.getElementById('releases-link').href = RELEASES_URL;
+      document.getElementById('issues-link').href = ISSUES_URL;
 
       function fmtDate(iso) {
         try {
